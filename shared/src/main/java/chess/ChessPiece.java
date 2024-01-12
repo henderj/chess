@@ -17,12 +17,22 @@ public class ChessPiece {
      * The various different chess piece options
      */
     public enum PieceType {
-        KING,
-        QUEEN,
-        BISHOP,
-        KNIGHT,
-        ROOK,
-        PAWN
+        KING(1),
+        QUEEN(2),
+        BISHOP(3),
+        KNIGHT(4),
+        ROOK(5),
+        PAWN(6);
+
+        private final int value;
+
+        PieceType(int value) {
+            this.value = value;
+        }
+
+        public int getValue(){
+            return value;
+        }
     }
 
     /**
