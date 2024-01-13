@@ -8,7 +8,7 @@ package chess;
  */
 public class ChessPosition {
 
-    private int row, col;
+    private final int row, col;
 
     public ChessPosition(int row, int col) {
         this.row = row;
