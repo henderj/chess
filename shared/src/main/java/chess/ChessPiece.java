@@ -1,8 +1,6 @@
 package chess;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * Represents a single chess piece
@@ -72,20 +70,32 @@ public class ChessPiece {
      * @return Collection of diagonal moves
      */
     private static Collection<ChessMove> diagonalMoves(ChessBoard board, ChessPosition position, int distance) {
-        ArrayList<ChessMove> moves = new ArrayList<>();
+        HashSet<ChessMove> moves = new HashSet<>();
+
         for (int i = 1; i <= distance; i++) {
-            var NE = new ChessPosition(position.getRow() - i, position.getColumn() + i);
-            if (board.inBounds(NE)) moves.add(new ChessMove(position, NE));
-
-            var SE = new ChessPosition(position.getRow() + i, position.getColumn() + i);
-            if (board.inBounds(SE)) moves.add(new ChessMove(position, SE));
-
-            var SW = new ChessPosition(position.getRow() + i, position.getColumn() - i);
-            if (board.inBounds(SW)) moves.add(new ChessMove(position, SW));
-
-            var NW = new ChessPosition(position.getRow() - i, position.getColumn() - i);
-            if (board.inBounds(NW)) moves.add(new ChessMove(position, NW));
+            var NE = new ChessPosition(position.getRow() + i, position.getColumn() + i);
+            if(!board.inBounds(NE)) break;
+            moves.add(new ChessMove(position, NE));
         }
+
+        for (int i = 1; i <= distance; i++) {
+            var SE = new ChessPosition(position.getRow() - i, position.getColumn() + i);
+            if(!board.inBounds(SE)) break;
+            moves.add(new ChessMove(position, SE));
+        }
+
+        for (int i = 1; i <= distance; i++) {
+            var SW = new ChessPosition(position.getRow() - i, position.getColumn() - i);
+            if(!board.inBounds(SW)) break;
+            moves.add(new ChessMove(position, SW));
+        }
+
+        for (int i = 1; i <= distance; i++) {
+            var NW = new ChessPosition(position.getRow() + i, position.getColumn() - i);
+            if(!board.inBounds(NW)) break;
+            moves.add(new ChessMove(position, NW));
+        }
+
         return moves;
     }
 }

@@ -64,8 +64,9 @@ public class ChessMove {
 
     @Override
     public String toString() {
-        return startPosition +
-                "=>" + endPosition +
-                "==>" + promotionPiece;
+        StringBuilder str = new StringBuilder();
+        str.append(startPosition).append("=>").append(endPosition);
+        if (promotionPiece != null) str.append("==>").append(promotionPiece);
+        return str.toString();
     }
 }
