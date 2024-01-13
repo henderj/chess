@@ -9,7 +9,8 @@ public class ChessPieceMoves {
      *
      * @return Collection of diagonal moves
      */
-    static Collection<ChessMove> diagonalMoves(ChessBoard board, ChessPosition position, ChessGame.TeamColor color) {
+    public static Collection<ChessMove> diagonalMoves(ChessBoard board, ChessPosition position,
+                                                      ChessGame.TeamColor color) {
         return diagonalMoves(board, position, color, 7);
     }
 
@@ -18,8 +19,8 @@ public class ChessPieceMoves {
      *
      * @return Collection of diagonal moves
      */
-    private static Collection<ChessMove> diagonalMoves(ChessBoard board, ChessPosition position,
-                                                       ChessGame.TeamColor color, int distance) {
+    public static Collection<ChessMove> diagonalMoves(ChessBoard board, ChessPosition position,
+                                                      ChessGame.TeamColor color, int distance) {
         HashSet<ChessMove> moves = new HashSet<>();
 
         for (int i = 1; i <= distance; i++) {
@@ -40,6 +41,37 @@ public class ChessPieceMoves {
         for (int i = 1; i <= distance; i++) {
             var NW = new ChessPosition(position.getRow() + i, position.getColumn() - i);
             if (addMoveIfValid(board, position, color, moves, NW)) break;
+        }
+
+        return moves;
+    }
+
+    public static Collection<ChessMove> straightMoves(ChessBoard board, ChessPosition position, ChessGame.TeamColor color){
+        return straightMoves(board, position, color, 7);
+    }
+
+    public static Collection<ChessMove> straightMoves(ChessBoard board, ChessPosition position,
+                                                      ChessGame.TeamColor color, int distance) {
+        HashSet<ChessMove> moves = new HashSet<>();
+
+        for (int i = 1; i <= distance; i++) {
+            var N = new ChessPosition(position.getRow() + i, position.getColumn());
+            if (addMoveIfValid(board, position, color, moves, N)) break;
+        }
+
+        for (int i = 1; i <= distance; i++) {
+            var E = new ChessPosition(position.getRow(), position.getColumn() + i);
+            if (addMoveIfValid(board, position, color, moves, E)) break;
+        }
+
+        for (int i = 1; i <= distance; i++) {
+            var S = new ChessPosition(position.getRow() - i, position.getColumn());
+            if (addMoveIfValid(board, position, color, moves, S)) break;
+        }
+
+        for (int i = 1; i <= distance; i++) {
+            var W = new ChessPosition(position.getRow(), position.getColumn() - i);
+            if (addMoveIfValid(board, position, color, moves, W)) break;
         }
 
         return moves;

@@ -29,7 +29,7 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return color;
     }
 
     /**
@@ -47,7 +47,20 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return ChessPieceMoves.diagonalMoves(board, myPosition, color);
+        switch (type) {
+            case BISHOP -> {
+                return ChessPieceMoves.diagonalMoves(board, myPosition, color);
+            }
+            case ROOK -> {
+                return ChessPieceMoves.straightMoves(board, myPosition, color);
+            }
+            case QUEEN -> {
+                var moves = ChessPieceMoves.straightMoves(board, myPosition, color);
+                moves.addAll(ChessPieceMoves.diagonalMoves(board, myPosition, color));
+                return moves;
+            }
+            default -> throw new RuntimeException("Not Implemented");
+        }
     }
 
 }
