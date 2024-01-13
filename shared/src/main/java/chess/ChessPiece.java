@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Represents a single chess piece
@@ -52,6 +54,38 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        return diagonalMoves(board, myPosition);
+    }
+
+    /**
+     * Calculates all the diagonal moves available to a chess piece up to the edge of the board
+     *
+     * @return Collection of diagonal moves
+     */
+    private static Collection<ChessMove> diagonalMoves(ChessBoard board, ChessPosition position) {
+        return diagonalMoves(board, position, 7);
+    }
+
+    /**
+     * Calculates all the diagonal moves available to a chess piece up to <code>distance</code> squares
+     *
+     * @return Collection of diagonal moves
+     */
+    private static Collection<ChessMove> diagonalMoves(ChessBoard board, ChessPosition position, int distance) {
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        for (int i = 1; i <= distance; i++) {
+            var NE = new ChessPosition(position.getRow() - i, position.getColumn() + i);
+            if (board.inBounds(NE)) moves.add(new ChessMove(position, NE));
+
+            var SE = new ChessPosition(position.getRow() + i, position.getColumn() + i);
+            if (board.inBounds(SE)) moves.add(new ChessMove(position, SE));
+
+            var SW = new ChessPosition(position.getRow() + i, position.getColumn() - i);
+            if (board.inBounds(SW)) moves.add(new ChessMove(position, SW));
+
+            var NW = new ChessPosition(position.getRow() - i, position.getColumn() - i);
+            if (board.inBounds(NW)) moves.add(new ChessMove(position, NW));
+        }
+        return moves;
     }
 }
