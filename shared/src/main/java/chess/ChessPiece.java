@@ -59,6 +59,11 @@ public class ChessPiece {
                 moves.addAll(ChessPieceMoves.diagonalMoves(board, myPosition, color));
                 return moves;
             }
+            case KING -> {
+                var moves = ChessPieceMoves.straightMoves(board, myPosition, color, 1);
+                moves.addAll(ChessPieceMoves.diagonalMoves(board, myPosition, color, 1));
+                return moves;
+            }
             default -> throw new RuntimeException("Not Implemented");
         }
     }
