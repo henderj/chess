@@ -91,4 +91,16 @@ public class ChessPieceMoves {
         moves.add(new ChessMove(position, endPosition));
         return piece != null; // can capture other team, but can't move further
     }
+
+    public static Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition position, ChessGame.TeamColor color) {
+        HashSet<ChessMove> moves = new HashSet<>();
+        if (color == ChessGame.TeamColor.WHITE){
+            var forward = new ChessPosition(position.getRow() + 1, position.getColumn());
+            addMoveIfValid(board, position, color, moves, forward);
+        } else {
+            var forward = new ChessPosition(position.getRow() - 1, position.getColumn());
+            addMoveIfValid(board, position, color, moves, forward);
+        }
+        return moves;
+    }
 }

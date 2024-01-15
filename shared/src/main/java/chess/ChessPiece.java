@@ -64,6 +64,9 @@ public class ChessPiece {
                 moves.addAll(ChessPieceMoves.diagonalMoves(board, myPosition, color, 1));
                 return moves;
             }
+            case PAWN -> {
+                return ChessPieceMoves.pawnMoves(board, myPosition, color);
+            }
             default -> throw new RuntimeException("Not Implemented");
         }
     }
