@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 public class ChessPieceMoves {
     /**
@@ -163,6 +164,22 @@ public class ChessPieceMoves {
         return moves;
     }
 
+    public static Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition position,
+                                                    ChessGame.TeamColor color) {
+        var moves = new HashSet<ChessMove>();
+        int col = position.getColumn();
+        int row = position.getRow();
+        moves.add(new ChessMove(position, new ChessPosition(row + 2, col + 1))); // NNE
+        moves.add(new ChessMove(position, new ChessPosition(row + 1, col + 2))); // ENE
+        moves.add(new ChessMove(position, new ChessPosition(row - 1, col + 2))); // ESE
+        moves.add(new ChessMove(position, new ChessPosition(row - 2, col + 1))); // SSE
+        moves.add(new ChessMove(position, new ChessPosition(row - 2, col - 1))); // SSW
+        moves.add(new ChessMove(position, new ChessPosition(row - 1, col - 2))); // WSW
+        moves.add(new ChessMove(position, new ChessPosition(row + 1, col - 2))); // WNW
+        moves.add(new ChessMove(position, new ChessPosition(row + 2, col - 1))); // NNW
+        return moves.stream().filter(m -> isValid(board, m, color)).collect(Collectors.toSet());
+    }
+
     /**
      * Checks if the given move is a valid move for the piece
      *
@@ -211,4 +228,5 @@ public class ChessPieceMoves {
         moves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.QUEEN));
         return moves;
     }
+
 }

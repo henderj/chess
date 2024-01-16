@@ -67,6 +67,9 @@ public class ChessPiece {
             case PAWN -> {
                 return ChessPieceMoves.pawnMoves(board, myPosition, color);
             }
+            case KNIGHT -> {
+                return ChessPieceMoves.knightMoves(board, myPosition, color);
+            }
             default -> throw new RuntimeException("Not Implemented");
         }
     }
