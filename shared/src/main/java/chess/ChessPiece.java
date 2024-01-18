@@ -74,4 +74,34 @@ public class ChessPiece {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessPiece that = (ChessPiece) o;
+        return type == that.type && color == that.color;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, color);
+    }
+
+    @Override
+    public String toString() {
+        String str;
+        switch (type) {
+            case KING -> str = "K";
+            case QUEEN -> str = "Q";
+            case BISHOP -> str = "B";
+            case KNIGHT -> str = "N";
+            case ROOK -> str = "R";
+            case PAWN -> str = "P";
+            default -> str = "U";
+        }
+        if (color == ChessGame.TeamColor.BLACK) {
+            str = str.toLowerCase();
+        }
+        return str;
+    }
 }
