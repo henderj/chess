@@ -23,7 +23,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        board[8 - position.getRow()][position.getColumn() - 1] = piece;
+        board[8 - position.row()][position.col() - 1] = piece;
     }
 
     /**
@@ -34,7 +34,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return board[8 - position.getRow()][position.getColumn() - 1];
+        return board[8 - position.row()][position.col() - 1];
     }
 
     /**
@@ -80,7 +80,7 @@ public class ChessBoard {
      * @return true if the position is in the bounds of the board. Otherwise, false
      */
     public boolean inBounds(ChessPosition position) {
-        return position.getRow() > 0 && position.getRow() <= 8 && position.getColumn() > 0 && position.getColumn() <= 8;
+        return position.row() > 0 && position.row() <= 8 && position.col() > 0 && position.col() <= 8;
     }
 
     @Override

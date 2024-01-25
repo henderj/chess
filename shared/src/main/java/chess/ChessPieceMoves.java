@@ -25,7 +25,7 @@ public class ChessPieceMoves {
         HashSet<ChessMove> moves = new HashSet<>();
 
         for (int i = 1; i <= distance; i++) {
-            var NE = new ChessPosition(position.getRow() + i, position.getColumn() + i);
+            var NE = new ChessPosition(position.row() + i, position.col() + i);
             var move = new ChessMove(position, NE);
             if (!isValid(board, move, color)) break;
             moves.add(move);
@@ -33,7 +33,7 @@ public class ChessPieceMoves {
         }
 
         for (int i = 1; i <= distance; i++) {
-            var SE = new ChessPosition(position.getRow() - i, position.getColumn() + i);
+            var SE = new ChessPosition(position.row() - i, position.col() + i);
             var move = new ChessMove(position, SE);
             if (!isValid(board, move, color)) break;
             moves.add(move);
@@ -41,7 +41,7 @@ public class ChessPieceMoves {
         }
 
         for (int i = 1; i <= distance; i++) {
-            var SW = new ChessPosition(position.getRow() - i, position.getColumn() - i);
+            var SW = new ChessPosition(position.row() - i, position.col() - i);
             var move = new ChessMove(position, SW);
             if (!isValid(board, move, color)) break;
             moves.add(move);
@@ -49,7 +49,7 @@ public class ChessPieceMoves {
         }
 
         for (int i = 1; i <= distance; i++) {
-            var NW = new ChessPosition(position.getRow() + i, position.getColumn() - i);
+            var NW = new ChessPosition(position.row() + i, position.col() - i);
             var move = new ChessMove(position, NW);
             if (!isValid(board, move, color)) break;
             moves.add(move);
@@ -79,7 +79,7 @@ public class ChessPieceMoves {
         HashSet<ChessMove> moves = new HashSet<>();
 
         for (int i = 1; i <= distance; i++) {
-            var N = new ChessPosition(position.getRow() + i, position.getColumn());
+            var N = new ChessPosition(position.row() + i, position.col());
             var move = new ChessMove(position, N);
             if (!isValid(board, move, color)) break;
             moves.add(move);
@@ -87,7 +87,7 @@ public class ChessPieceMoves {
         }
 
         for (int i = 1; i <= distance; i++) {
-            var E = new ChessPosition(position.getRow(), position.getColumn() + i);
+            var E = new ChessPosition(position.row(), position.col() + i);
             var move = new ChessMove(position, E);
             if (!isValid(board, move, color)) break;
             moves.add(move);
@@ -95,7 +95,7 @@ public class ChessPieceMoves {
         }
 
         for (int i = 1; i <= distance; i++) {
-            var S = new ChessPosition(position.getRow() - i, position.getColumn());
+            var S = new ChessPosition(position.row() - i, position.col());
             var move = new ChessMove(position, S);
             if (!isValid(board, move, color)) break;
             moves.add(move);
@@ -103,7 +103,7 @@ public class ChessPieceMoves {
         }
 
         for (int i = 1; i <= distance; i++) {
-            var W = new ChessPosition(position.getRow(), position.getColumn() - i);
+            var W = new ChessPosition(position.row(), position.col() - i);
             var move = new ChessMove(position, W);
             if (!isValid(board, move, color)) break;
             moves.add(move);
@@ -120,8 +120,8 @@ public class ChessPieceMoves {
      */
     public static Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition position, ChessGame.TeamColor color) {
         HashSet<ChessMove> moves = new HashSet<>();
-        var row = position.getRow();
-        var col = position.getColumn();
+        var row = position.row();
+        var col = position.col();
         var forward = 1;
         var startingRow = 2;
         var endRow = 8;
@@ -132,7 +132,7 @@ public class ChessPieceMoves {
         }
         var forwardMove = new ChessMove(position, new ChessPosition(row + forward, col));
         if (isValid(board, forwardMove, color, false)) {
-            if (forwardMove.getEndPosition().getRow() == endRow) {
+            if (forwardMove.getEndPosition().row() == endRow) {
                 moves.addAll(getPromotionMoves(forwardMove));
             } else {
                 moves.add(forwardMove);
@@ -145,7 +145,7 @@ public class ChessPieceMoves {
 
         var diagonalCaptureLeft = new ChessMove(position, new ChessPosition(row + forward, col - 1));
         if (isValid(board, diagonalCaptureLeft, color) && isCapture(board, diagonalCaptureLeft, color)) {
-            if (diagonalCaptureLeft.getEndPosition().getRow() == endRow) {
+            if (diagonalCaptureLeft.getEndPosition().row() == endRow) {
                 moves.addAll(getPromotionMoves(diagonalCaptureLeft));
             } else {
                 moves.add(diagonalCaptureLeft);
@@ -154,7 +154,7 @@ public class ChessPieceMoves {
 
         var diagonalCaptureRight = new ChessMove(position, new ChessPosition(row + forward, col + 1));
         if (isValid(board, diagonalCaptureRight, color) && isCapture(board, diagonalCaptureRight, color)) {
-            if (diagonalCaptureRight.getEndPosition().getRow() == endRow) {
+            if (diagonalCaptureRight.getEndPosition().row() == endRow) {
                 moves.addAll(getPromotionMoves(diagonalCaptureRight));
             } else {
                 moves.add(diagonalCaptureRight);
@@ -167,8 +167,8 @@ public class ChessPieceMoves {
     public static Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition position,
                                                     ChessGame.TeamColor color) {
         var moves = new HashSet<ChessMove>();
-        int col = position.getColumn();
-        int row = position.getRow();
+        int col = position.col();
+        int row = position.row();
         moves.add(new ChessMove(position, new ChessPosition(row + 2, col + 1))); // NNE
         moves.add(new ChessMove(position, new ChessPosition(row + 1, col + 2))); // ENE
         moves.add(new ChessMove(position, new ChessPosition(row - 1, col + 2))); // ESE
