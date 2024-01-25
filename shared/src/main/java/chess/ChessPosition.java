@@ -10,6 +10,7 @@ public record ChessPosition(int row, int col) {
 
     @Override
     public String toString() {
-        return "{" + row + "," + col + '}';
+        final char[] columnNames = {'a','b','c','d','e','f','g','h'};
+        return "" + columnNames[col] + row;
     }
 }
