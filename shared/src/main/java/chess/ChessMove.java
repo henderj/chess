@@ -8,7 +8,7 @@ import java.util.Objects;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessMove {
+public final class ChessMove {
 
     private final ChessPosition startPosition;
     private final ChessPosition endPosition;
