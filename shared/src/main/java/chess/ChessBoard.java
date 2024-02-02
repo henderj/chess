@@ -11,6 +11,7 @@ import java.util.Arrays;
 public class ChessBoard {
 
     private final ChessPiece[][] board;
+    private ChessPosition kingPositionWhite, kingPositionBlack;
 
     public ChessBoard() {
         board = new ChessPiece[8][8];
@@ -24,6 +25,13 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         board[8 - position.row()][position.col() - 1] = piece;
+        if (piece.getPieceType() == ChessPiece.PieceType.KING){
+            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+                kingPositionWhite = position;
+            } else {
+                kingPositionBlack = position;
+            }
+        }
     }
 
     /**
@@ -35,6 +43,32 @@ public class ChessBoard {
      */
     public ChessPiece getPiece(ChessPosition position) {
         return board[8 - position.row()][position.col() - 1];
+    }
+
+    public interface PieceOperation {
+        void apply(ChessPosition position, ChessPiece piece);
+    }
+
+    public void forEveryPiece(PieceOperation operation){
+        for (int row = 1; row <= 8; row++){
+            for (int col = 1; col <= 8; col++){
+                var position = new ChessPosition(row, col);
+                var piece = getPiece(position);
+                operation.apply(position, piece);
+            }
+        }
+    }
+
+    /**
+     * Gets the position of the king.
+     * @param color
+     * @return the position of the king for the given color. null if there is no king.
+     */
+    public ChessPosition getKingPosition(ChessGame.TeamColor color){
+        if (color == ChessGame.TeamColor.WHITE){
+            return kingPositionWhite;
+        }
+        return kingPositionBlack;
     }
 
     /**
