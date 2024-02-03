@@ -80,6 +80,9 @@ public class ChessBoard {
     }
 
     public record AppliedChessMove(ChessMove move, ChessPiece piece, ChessPiece capturedPiece) {
+        public boolean isCastleMove(){
+            return piece.getPieceType() == ChessPiece.PieceType.KING && (Math.abs(move.getStartPosition().col() - move.getEndPosition().col()) == 2);
+        }
     }
 
     public AppliedChessMove applyMove(ChessMove move) {

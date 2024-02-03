@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.stream.Collectors;
@@ -180,6 +181,43 @@ public class ChessPieceMoves {
         return moves.stream().filter(m -> isValid(board, m, color)).collect(Collectors.toSet());
     }
 
+    public static Collection<ChessMove> kingsideCastleMoves(ChessBoard board, ChessPosition position,
+                                                            ChessGame.TeamColor color) {
+        var kingsideCastleMoves = new ArrayList<ChessMove>();
+        var kingside1 = new ChessMove(position, new ChessPosition(position.row(), 6));
+        var kingside2 = new ChessMove(position, new ChessPosition(position.row(), 7));
+        if (isValid(board, kingside1, color, false) && isValid(board, kingside2, color, false)) {
+           kingsideCastleMoves.add(kingside1);
+           kingsideCastleMoves.add(kingside2);
+        }
+
+        var rookMove = new ChessMove(new ChessPosition(position.row(), 8), new ChessPosition(position.row(), 6));
+        if (isValid(board, rookMove, color, false)) {
+            kingsideCastleMoves.add(rookMove);
+        }
+
+        return kingsideCastleMoves;
+    }
+
+    public static Collection<ChessMove> queensideCastleMoves(ChessBoard board, ChessPosition position,
+                                                             ChessGame.TeamColor color) {
+        var queensideCastleMoves = new ArrayList<ChessMove>();
+        var queenside1 = new ChessMove(position, new ChessPosition(position.row(), 4));
+        var queenside2 = new ChessMove(position, new ChessPosition(position.row(), 3));
+        if (isValid(board, queenside1, color, false) && isValid(board, queenside2, color, false)) {
+            queensideCastleMoves.add(queenside1);
+            queensideCastleMoves.add(queenside2);
+        }
+
+        var rookMove1 = new ChessMove(new ChessPosition(position.row(), 1), new ChessPosition(position.row(), 2));
+        var rookMove2 = new ChessMove(new ChessPosition(position.row(), 1), new ChessPosition(position.row(), 4));
+        if (isValid(board, rookMove1, color, false) && isValid(board, rookMove2, color, false)) {
+            queensideCastleMoves.add(rookMove1);
+            queensideCastleMoves.add(rookMove2);
+        }
+
+        return queensideCastleMoves;
+    }
     /**
      * Checks if the given move is a valid move for the piece
      *
