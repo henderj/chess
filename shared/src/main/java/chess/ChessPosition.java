@@ -11,6 +11,6 @@ public record ChessPosition(int row, int col) {
     @Override
     public String toString() {
         final char[] columnNames = {'a','b','c','d','e','f','g','h'};
-        return "" + columnNames[col] + row;
+        return "" + columnNames[col-1] + row;
     }
 }
