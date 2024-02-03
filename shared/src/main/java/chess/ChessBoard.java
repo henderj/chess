@@ -85,7 +85,11 @@ public class ChessBoard {
     public AppliedChessMove applyMove(ChessMove move) {
         var piece = removePiece(move.getStartPosition());
         var capturedPiece = removePiece(move.getEndPosition());
-        addPiece(move.getEndPosition(), piece);
+        if (move.getPromotionPiece() != null) {
+            addPiece(move.getEndPosition(), new ChessPiece(piece.getTeamColor(), move.getPromotionPiece()));
+        } else {
+            addPiece(move.getEndPosition(), piece);
+        }
         return new AppliedChessMove(move, piece, capturedPiece);
     }
 
