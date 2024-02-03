@@ -74,7 +74,12 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
 
-        throw new RuntimeException("Not implemented");
+        var validMoves = validMoves(move.getStartPosition());
+        if (validMoves == null || !validMoves.contains(move)){
+            throw new InvalidMoveException(move.toString());
+        }
+
+        var appliedMove = board.applyMove(move);
     }
 
     /**
