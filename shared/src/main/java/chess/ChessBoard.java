@@ -25,13 +25,20 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         board[8 - position.row()][position.col() - 1] = piece;
-        if (piece.getPieceType() == ChessPiece.PieceType.KING){
-            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+        if (piece == null) return;
+        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
                 kingPositionWhite = position;
             } else {
                 kingPositionBlack = position;
             }
         }
+    }
+
+    public ChessPiece removePiece(ChessPosition position) {
+        var piece = board[8 - position.row()][position.col() - 1];
+        board[8 - position.row()][position.col() - 1] = null;
+        return piece;
     }
 
     /**
@@ -49,9 +56,9 @@ public class ChessBoard {
         void apply(ChessPosition position, ChessPiece piece);
     }
 
-    public void forEveryPiece(PieceOperation operation){
-        for (int row = 1; row <= 8; row++){
-            for (int col = 1; col <= 8; col++){
+    public void forEveryPiece(PieceOperation operation) {
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
                 var position = new ChessPosition(row, col);
                 var piece = getPiece(position);
                 operation.apply(position, piece);
@@ -61,14 +68,30 @@ public class ChessBoard {
 
     /**
      * Gets the position of the king.
+     *
      * @param color
      * @return the position of the king for the given color. null if there is no king.
      */
-    public ChessPosition getKingPosition(ChessGame.TeamColor color){
-        if (color == ChessGame.TeamColor.WHITE){
+    public ChessPosition getKingPosition(ChessGame.TeamColor color) {
+        if (color == ChessGame.TeamColor.WHITE) {
             return kingPositionWhite;
         }
         return kingPositionBlack;
+    }
+
+    public record AppliedChessMove(ChessMove move, ChessPiece piece, ChessPiece capturedPiece) {
+    }
+
+    public AppliedChessMove applyMove(ChessMove move) {
+        var piece = removePiece(move.getStartPosition());
+        var capturedPiece = removePiece(move.getEndPosition());
+        addPiece(move.getEndPosition(), piece);
+        return new AppliedChessMove(move, piece, capturedPiece);
+    }
+
+    public void unApplyMove(AppliedChessMove move) {
+        addPiece(move.move.getStartPosition(), move.piece);
+        addPiece(move.move.getEndPosition(), move.capturedPiece);
     }
 
     /**
@@ -88,8 +111,8 @@ public class ChessBoard {
             addPiece(new ChessPosition(2, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
         }
 
-        for (int r = 3; r <= 6; r++){
-            for (int c = 1; c <= 8; c++){
+        for (int r = 3; r <= 6; r++) {
+            for (int c = 1; c <= 8; c++) {
                 addPiece(new ChessPosition(r, c), null);
             }
         }

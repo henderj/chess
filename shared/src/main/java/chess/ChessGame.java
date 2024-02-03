@@ -11,7 +11,7 @@ import java.util.Collection;
 public class ChessGame {
 
     private ChessBoard board;
-    private TeamColor turn;
+    private TeamColor turn = TeamColor.WHITE;
 
     public ChessGame() {
 
@@ -52,8 +52,18 @@ public class ChessGame {
         var piece = board.getPiece(startPosition);
         if (piece == null) return null;
 
+        var potentialMoves = piece.pieceMoves(board, startPosition);
+        var iterator = potentialMoves.iterator();
+        while (iterator.hasNext()) {
+            var move = iterator.next();
+            var appliedMove = board.applyMove(move);
+            if (isInCheck(piece.getTeamColor())) {
+                iterator.remove();
+            }
+            board.unApplyMove(appliedMove);
+        }
 
-        throw new RuntimeException("Not implemented");
+        return potentialMoves;
     }
 
     /**
@@ -63,6 +73,7 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+
         throw new RuntimeException("Not implemented");
     }
 
@@ -86,9 +97,10 @@ public class ChessGame {
                 if (piece.getTeamColor() == teamColor) continue;
 
                 var attackKingMove = new ChessMove(position, kingPosition);
+                var attackKingPromotionMoves = ChessPieceMoves.getPromotionMoves(attackKingMove);
                 var moves = piece.pieceMoves(board, position);
 
-                if (moves.contains(attackKingMove)) {
+                if (moves.contains(attackKingMove) || moves.stream().anyMatch(attackKingPromotionMoves::contains)) {
                     inCheck = true;
                     break;
                 }
@@ -105,7 +117,19 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (!isInCheck(teamColor)) return false;
+
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                var position = new ChessPosition(row, col);
+                var piece = board.getPiece(position);
+                if (piece == null || piece.getTeamColor() != teamColor) continue;
+
+                var validMoves = validMoves(position);
+                if (validMoves != null && !validMoves.isEmpty()) return false;
+            }
+        }
+        return true;
     }
 
     /**
