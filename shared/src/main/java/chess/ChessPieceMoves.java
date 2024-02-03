@@ -220,7 +220,7 @@ public class ChessPieceMoves {
      *
      * @return Collection of promotion moves
      */
-    private static Collection<ChessMove> getPromotionMoves(ChessMove move) {
+    public static Collection<ChessMove> getPromotionMoves(ChessMove move) {
         var moves = new HashSet<ChessMove>();
         moves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.BISHOP));
         moves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.KNIGHT));
