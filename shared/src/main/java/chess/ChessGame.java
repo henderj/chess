@@ -73,13 +73,19 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        var piece = board.getPiece(move.getStartPosition());
+        if (piece == null) throw new InvalidMoveException("No piece at start position: " + move);
+
+        if (piece.getTeamColor() != turn) throw new InvalidMoveException("Not this team's turn: " + move);
 
         var validMoves = validMoves(move.getStartPosition());
         if (validMoves == null || !validMoves.contains(move)){
-            throw new InvalidMoveException(move.toString());
+            throw new InvalidMoveException("Not a valid move: " + move);
         }
 
         var appliedMove = board.applyMove(move);
+
+        setTeamTurn(turn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
     }
 
     /**
