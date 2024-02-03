@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Deque;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -12,9 +14,10 @@ public class ChessGame {
 
     private ChessBoard board;
     private TeamColor turn = TeamColor.WHITE;
+    private Deque<ChessBoard.AppliedChessMove> moveHistory;
 
     public ChessGame() {
-
+        moveHistory = new ArrayDeque<>();
     }
 
     /**
@@ -84,6 +87,7 @@ public class ChessGame {
         }
 
         var appliedMove = board.applyMove(move);
+        moveHistory.push(appliedMove);
 
         setTeamTurn(turn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
     }
