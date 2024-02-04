@@ -187,8 +187,10 @@ public class ChessPieceMoves {
         var kingside1 = new ChessMove(position, new ChessPosition(position.row(), 6));
         var kingside2 = new ChessMove(position, new ChessPosition(position.row(), 7));
         if (isValid(board, kingside1, color, false) && isValid(board, kingside2, color, false)) {
-           kingsideCastleMoves.add(kingside1);
-           kingsideCastleMoves.add(kingside2);
+            kingsideCastleMoves.add(kingside1);
+            kingsideCastleMoves.add(kingside2);
+        } else {
+            return kingsideCastleMoves;
         }
 
         var rookMove = new ChessMove(new ChessPosition(position.row(), 8), new ChessPosition(position.row(), 6));
@@ -207,6 +209,8 @@ public class ChessPieceMoves {
         if (isValid(board, queenside1, color, false) && isValid(board, queenside2, color, false)) {
             queensideCastleMoves.add(queenside1);
             queensideCastleMoves.add(queenside2);
+        } else {
+            return queensideCastleMoves;
         }
 
         var rookMove1 = new ChessMove(new ChessPosition(position.row(), 1), new ChessPosition(position.row(), 2));
@@ -218,6 +222,7 @@ public class ChessPieceMoves {
 
         return queensideCastleMoves;
     }
+
     /**
      * Checks if the given move is a valid move for the piece
      *
