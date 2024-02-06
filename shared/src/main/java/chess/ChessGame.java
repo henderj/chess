@@ -3,6 +3,7 @@ package chess;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.stream.Collectors;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -16,6 +17,8 @@ public class ChessGame {
     private TeamColor turn = TeamColor.WHITE;
     private Deque<ChessBoard.AppliedChessMove> moveHistory;
 
+    private ChessPosition enPassantPosition = null;
+    private ChessPieceMoves.EnPassantChessMove enPassantMove = null;
     private boolean whiteRook1Moved = false;
     private boolean whiteRook2Moved = false;
     private boolean whiteKingMoved = false;
@@ -65,6 +68,11 @@ public class ChessGame {
 
 
         var potentialMoves = piece.pieceMoves(board, startPosition);
+
+        if (enPassantPosition != null && piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            enPassantMove = ChessPieceMoves.enPassantMove(board, startPosition, color, enPassantPosition);
+            if (enPassantMove != null) potentialMoves.add(enPassantMove);
+        }
         var iterator = potentialMoves.iterator();
         while (iterator.hasNext()) {
             var move = iterator.next();
@@ -150,6 +158,14 @@ public class ChessGame {
             }
         }
 
+//        potentialMoves = potentialMoves.stream().map(chessMove -> (ChessMove)chessMove).collect(Collectors.toSet());
+        if (enPassantMove != null && potentialMoves.contains(enPassantMove)){
+            potentialMoves.remove(enPassantMove);
+            potentialMoves.add(new ChessMove(enPassantMove.getStartPosition(), enPassantMove.getEndPosition()));
+        } else {
+            enPassantMove = null;
+        }
+
         return potentialMoves;
     }
 
@@ -170,7 +186,7 @@ public class ChessGame {
             throw new InvalidMoveException("Not a valid move: " + move);
         }
 
-        var appliedMove = board.applyMove(move);
+        var appliedMove = enPassantMove == null ? board.applyMove(move) : board.applyMove(enPassantMove);
         if (appliedMove.isCastleMove()) {
             var newRookCol = move.getEndPosition().col() == 7 ? 6 : 4;
             var oldRookCol = newRookCol == 6 ? 8 : 1;
@@ -181,16 +197,25 @@ public class ChessGame {
         }
         moveHistory.push(appliedMove);
 
-        if (appliedMove.piece().getPieceType() == ChessPiece.PieceType.KING) {
+        if (appliedMove.getPiece().getPieceType() == ChessPiece.PieceType.KING) {
             if (turn == TeamColor.WHITE) whiteKingMoved = true;
             else blackKingMoved = true;
         }
-        if (appliedMove.piece().getPieceType() == ChessPiece.PieceType.ROOK) {
-            if (appliedMove.move().getStartPosition().equals(new ChessPosition(1, 1))) whiteRook1Moved = true;
-            if (appliedMove.move().getStartPosition().equals(new ChessPosition(1, 8))) whiteRook2Moved = true;
-            if (appliedMove.move().getStartPosition().equals(new ChessPosition(8, 1))) blackRook1Moved = true;
-            if (appliedMove.move().getStartPosition().equals(new ChessPosition(8, 8))) blackRook2Moved = true;
+        if (appliedMove.getPiece().getPieceType() == ChessPiece.PieceType.ROOK) {
+            if (appliedMove.getMove().getStartPosition().equals(new ChessPosition(1, 1))) whiteRook1Moved = true;
+            if (appliedMove.getMove().getStartPosition().equals(new ChessPosition(1, 8))) whiteRook2Moved = true;
+            if (appliedMove.getMove().getStartPosition().equals(new ChessPosition(8, 1))) blackRook1Moved = true;
+            if (appliedMove.getMove().getStartPosition().equals(new ChessPosition(8, 8))) blackRook2Moved = true;
         }
+        if (appliedMove.isDoublePawnMove()) {
+            enPassantPosition = new ChessPosition(
+                    appliedMove.getMove().getEndPosition().row() + (getTeamTurn() == TeamColor.WHITE ? -1 : 1),
+                    appliedMove.getMove().getEndPosition().col());
+        } else {
+            enPassantPosition = null;
+        }
+
+        if (enPassantMove != null) enPassantMove = null;
 
         setTeamTurn(turn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
     }
@@ -288,6 +313,7 @@ public class ChessGame {
         blackKingMoved = false;
         blackRook1Moved = false;
         blackRook2Moved = false;
+        enPassantPosition = null;
     }
 
     /**

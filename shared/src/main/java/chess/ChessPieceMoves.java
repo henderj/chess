@@ -3,6 +3,7 @@ package chess;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ChessPieceMoves {
@@ -163,6 +164,45 @@ public class ChessPieceMoves {
         }
 
         return moves;
+    }
+
+    public static class EnPassantChessMove extends ChessMove {
+
+        private final ChessPosition capturedPiecePosition;
+
+        public EnPassantChessMove(ChessPosition startPosition, ChessPosition endPosition,
+                                  ChessPosition capturedPiecePosition) {
+            super(startPosition, endPosition);
+            this.capturedPiecePosition = capturedPiecePosition;
+        }
+
+        public ChessPosition getCapturedPiecePosition() {
+            return capturedPiecePosition;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return super.equals(o);
+//            EnPassantChessMove that = (EnPassantChessMove) o;
+//            return Objects.equals(capturedPiecePosition, that.capturedPiecePosition);
+        }
+
+        @Override
+        public int hashCode() {
+//            return Objects.hash(super.hashCode(), capturedPiecePosition);
+            return super.hashCode();
+        }
+    }
+
+    public static EnPassantChessMove enPassantMove(ChessBoard board, ChessPosition position, ChessGame.TeamColor color,
+                                          ChessPosition enPassantPosition) {
+        if (color == ChessGame.TeamColor.WHITE && (enPassantPosition.row() == 3 || position.row() != 5)) return null;
+        if (color == ChessGame.TeamColor.BLACK && (enPassantPosition.row() == 6 || position.row() != 4)) return null;
+
+        if (position.col() != enPassantPosition.col() + 1 && position.col() != enPassantPosition.col() - 1) return null;
+
+        return new EnPassantChessMove(position, enPassantPosition, new ChessPosition(position.row(),
+                                                                                     enPassantPosition.col()));
     }
 
     public static Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition position,
