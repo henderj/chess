@@ -3,7 +3,6 @@ package chess;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.stream.Collectors;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -15,19 +14,12 @@ public class ChessGame {
 
     private ChessBoard board;
     private TeamColor turn = TeamColor.WHITE;
-    private Deque<ChessBoard.AppliedChessMove> moveHistory;
+    private ChessMoveHistory moveHistory;
 
-    private ChessPosition enPassantPosition = null;
     private ChessPieceMoves.EnPassantChessMove enPassantMove = null;
-    private boolean whiteRook1Moved = false;
-    private boolean whiteRook2Moved = false;
-    private boolean whiteKingMoved = false;
-    private boolean blackRook1Moved = false;
-    private boolean blackRook2Moved = false;
-    private boolean blackKingMoved = false;
 
     public ChessGame() {
-        moveHistory = new ArrayDeque<>();
+        moveHistory = new ChessMoveHistory();
     }
 
     /**
@@ -66,13 +58,14 @@ public class ChessGame {
         if (piece == null) return null;
         var color = piece.getTeamColor();
 
-
         var potentialMoves = piece.pieceMoves(board, startPosition);
 
+        var enPassantPosition = moveHistory.getEnPassantPosition();
         if (enPassantPosition != null && piece.getPieceType() == ChessPiece.PieceType.PAWN) {
             enPassantMove = ChessPieceMoves.enPassantMove(board, startPosition, color, enPassantPosition);
             if (enPassantMove != null) potentialMoves.add(enPassantMove);
         }
+
         var iterator = potentialMoves.iterator();
         while (iterator.hasNext()) {
             var move = iterator.next();
@@ -84,82 +77,21 @@ public class ChessGame {
         }
 
         if (piece.getPieceType() == ChessPiece.PieceType.KING && !isInCheck(color)) {
-            if (color == TeamColor.WHITE && startPosition.equals(new ChessPosition(1, 5))) {
-                if (!whiteKingMoved) {
-                    if (!whiteRook1Moved) {
-                        var queensideCastleMoves = ChessPieceMoves.queensideCastleMoves(board, startPosition, color);
-                        var addQueensideCastle = !queensideCastleMoves.isEmpty();
-                        for (var move : queensideCastleMoves) {
-                            var appliedMove = board.applyMove(move);
-                            if (isInCheck(color)) {
-                                addQueensideCastle = false;
-                                board.unApplyMove(appliedMove);
-                                break;
-                            }
-                            board.unApplyMove(appliedMove);
-                        }
-                        if (addQueensideCastle) {
-                            potentialMoves.add(new ChessMove(startPosition, new ChessPosition(startPosition.row(), 3)));
-                        }
-                    }
-                    if (!whiteRook2Moved) {
-                        var kingsideCastleMoves = ChessPieceMoves.kingsideCastleMoves(board, startPosition, color);
-                        var addKingsideCastle = !kingsideCastleMoves.isEmpty();
-                        for (var move : kingsideCastleMoves) {
-                            var appliedMove = board.applyMove(move);
-                            if (isInCheck(color)) {
-                                addKingsideCastle = false;
-                                board.unApplyMove(appliedMove);
-                                break;
-                            }
-                            board.unApplyMove(appliedMove);
-                        }
-                        if (addKingsideCastle) {
-                            potentialMoves.add(new ChessMove(startPosition, new ChessPosition(startPosition.row(), 7)));
-                        }
-                    }
+            if (moveHistory.canCastleKingSide(color)) {
+                var kingSideCastleMoves = ChessPieceMoves.kingsideCastleMoves(board, startPosition, color);
+                if (isCastleMoveValid(kingSideCastleMoves, color)) {
+                    potentialMoves.add(new ChessMove(startPosition, new ChessPosition(startPosition.row(), 7)));
                 }
             }
-            if (color == TeamColor.BLACK && startPosition.equals(new ChessPosition(8, 5))) {
-                if (!blackKingMoved) {
-                    if (!blackRook1Moved) {
-                        var queensideCastleMoves = ChessPieceMoves.queensideCastleMoves(board, startPosition, color);
-                        var addQueensideCastle = !queensideCastleMoves.isEmpty();
-                        for (var move : queensideCastleMoves) {
-                            var appliedMove = board.applyMove(move);
-                            if (isInCheck(color)) {
-                                addQueensideCastle = false;
-                                board.unApplyMove(appliedMove);
-                                break;
-                            }
-                            board.unApplyMove(appliedMove);
-                        }
-                        if (addQueensideCastle) {
-                            potentialMoves.add(new ChessMove(startPosition, new ChessPosition(startPosition.row(), 3)));
-                        }
-                    }
-                    if (!blackRook2Moved) {
-                        var kingsideCastleMoves = ChessPieceMoves.kingsideCastleMoves(board, startPosition, color);
-                        var addKingsideCastle = !kingsideCastleMoves.isEmpty();
-                        for (var move : kingsideCastleMoves) {
-                            var appliedMove = board.applyMove(move);
-                            if (isInCheck(color)) {
-                                addKingsideCastle = false;
-                                board.unApplyMove(appliedMove);
-                                break;
-                            }
-                            board.unApplyMove(appliedMove);
-                        }
-                        if (addKingsideCastle) {
-                            potentialMoves.add(new ChessMove(startPosition, new ChessPosition(startPosition.row(), 7)));
-                        }
-                    }
+            if (moveHistory.canCastleQueenSide(color)) {
+                var queenSideCastleMoves = ChessPieceMoves.queensideCastleMoves(board, startPosition, color);
+                if (isCastleMoveValid(queenSideCastleMoves, color)) {
+                    potentialMoves.add(new ChessMove(startPosition, new ChessPosition(startPosition.row(), 3)));
                 }
             }
         }
 
-//        potentialMoves = potentialMoves.stream().map(chessMove -> (ChessMove)chessMove).collect(Collectors.toSet());
-        if (enPassantMove != null && potentialMoves.contains(enPassantMove)){
+        if (enPassantMove != null && potentialMoves.contains(enPassantMove)) {
             potentialMoves.remove(enPassantMove);
             potentialMoves.add(new ChessMove(enPassantMove.getStartPosition(), enPassantMove.getEndPosition()));
         } else {
@@ -167,6 +99,19 @@ public class ChessGame {
         }
 
         return potentialMoves;
+    }
+
+    private boolean isCastleMoveValid(Collection<ChessMove> castleMoves, TeamColor color) {
+        if (castleMoves == null || castleMoves.isEmpty()) return false;
+        for (var move : castleMoves) {
+            var appliedMoved = board.applyMove(move);
+            if (isInCheck(color)) {
+                board.unApplyMove(appliedMoved);
+                return false;
+            }
+            board.unApplyMove(appliedMoved);
+        }
+        return true;
     }
 
     /**
@@ -193,27 +138,9 @@ public class ChessGame {
             var rookMove = new ChessMove(new ChessPosition(move.getStartPosition().row(), oldRookCol),
                                          new ChessPosition(move.getStartPosition().row(), newRookCol));
             var appliedRookMove = board.applyMove(rookMove);
-            moveHistory.push(appliedRookMove);
+            moveHistory.pushMove(appliedRookMove);
         }
-        moveHistory.push(appliedMove);
-
-        if (appliedMove.getPiece().getPieceType() == ChessPiece.PieceType.KING) {
-            if (turn == TeamColor.WHITE) whiteKingMoved = true;
-            else blackKingMoved = true;
-        }
-        if (appliedMove.getPiece().getPieceType() == ChessPiece.PieceType.ROOK) {
-            if (appliedMove.getMove().getStartPosition().equals(new ChessPosition(1, 1))) whiteRook1Moved = true;
-            if (appliedMove.getMove().getStartPosition().equals(new ChessPosition(1, 8))) whiteRook2Moved = true;
-            if (appliedMove.getMove().getStartPosition().equals(new ChessPosition(8, 1))) blackRook1Moved = true;
-            if (appliedMove.getMove().getStartPosition().equals(new ChessPosition(8, 8))) blackRook2Moved = true;
-        }
-        if (appliedMove.isDoublePawnMove()) {
-            enPassantPosition = new ChessPosition(
-                    appliedMove.getMove().getEndPosition().row() + (getTeamTurn() == TeamColor.WHITE ? -1 : 1),
-                    appliedMove.getMove().getEndPosition().col());
-        } else {
-            enPassantPosition = null;
-        }
+        moveHistory.pushMove(appliedMove);
 
         if (enPassantMove != null) enPassantMove = null;
 
@@ -307,13 +234,7 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard board) {
         this.board = board;
-        whiteKingMoved = false;
-        whiteRook1Moved = false;
-        whiteRook2Moved = false;
-        blackKingMoved = false;
-        blackRook1Moved = false;
-        blackRook2Moved = false;
-        enPassantPosition = null;
+        this.moveHistory = new ChessMoveHistory();
     }
 
     /**

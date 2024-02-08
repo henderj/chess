@@ -224,6 +224,9 @@ public class ChessPieceMoves {
     public static Collection<ChessMove> kingsideCastleMoves(ChessBoard board, ChessPosition position,
                                                             ChessGame.TeamColor color) {
         var kingsideCastleMoves = new ArrayList<ChessMove>();
+        var kingRow = color == ChessGame.TeamColor.WHITE ? 1 : 8;
+        var kingPosition = new ChessPosition(kingRow, 5);
+        if (!position.equals(kingPosition)) return kingsideCastleMoves;
         var kingside1 = new ChessMove(position, new ChessPosition(position.row(), 6));
         var kingside2 = new ChessMove(position, new ChessPosition(position.row(), 7));
         if (isValid(board, kingside1, color, false) && isValid(board, kingside2, color, false)) {
@@ -244,6 +247,9 @@ public class ChessPieceMoves {
     public static Collection<ChessMove> queensideCastleMoves(ChessBoard board, ChessPosition position,
                                                              ChessGame.TeamColor color) {
         var queensideCastleMoves = new ArrayList<ChessMove>();
+        var kingRow = color == ChessGame.TeamColor.WHITE ? 1 : 8;
+        var kingPosition = new ChessPosition(kingRow, 5);
+        if (!position.equals(kingPosition)) return queensideCastleMoves;
         var queenside1 = new ChessMove(position, new ChessPosition(position.row(), 4));
         var queenside2 = new ChessMove(position, new ChessPosition(position.row(), 3));
         if (isValid(board, queenside1, color, false) && isValid(board, queenside2, color, false)) {
