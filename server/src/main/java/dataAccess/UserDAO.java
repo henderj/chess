@@ -3,9 +3,9 @@ package dataAccess;
 import model.UserData;
 
 public interface UserDAO {
-    void insertUser(UserData u);
+    UserData insertUser(UserData userData);
 
-    UserData readUser(UserData u);
+    UserData readUser(UserData userData);
 
     void clear();
 }
