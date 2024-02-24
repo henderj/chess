@@ -2,7 +2,6 @@ package dataAccessTests;
 
 import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
-import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryGameDAO;
 import model.GameData;
 import org.junit.jupiter.api.Assertions;
