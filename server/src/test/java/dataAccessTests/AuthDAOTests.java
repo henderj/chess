@@ -30,7 +30,7 @@ public class AuthDAOTests {
     @MethodSource("implementations")
     public void canCreateTwoAuths(AuthDAO authDAO) throws DataAccessException {
         UserData user = new UserData("name", "password", "email@email.com");
-        AuthData auth = authDAO.createAuth(user);
+        authDAO.createAuth(user);
         Assertions.assertDoesNotThrow(() -> authDAO.createAuth(user));
     }
 

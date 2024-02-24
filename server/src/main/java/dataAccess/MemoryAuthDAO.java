@@ -5,7 +5,6 @@ import model.UserData;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.UUID;
 
 public class MemoryAuthDAO implements AuthDAO {
@@ -37,7 +36,7 @@ public class MemoryAuthDAO implements AuthDAO {
     }
 
     @Override
-    public void deleteAuth(String authToken) throws DataAccessException {
+    public void deleteAuth(String authToken) {
         authDataCollection.removeIf(authData -> authData.authToken().equals(authToken));
     }
 
