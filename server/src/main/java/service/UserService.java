@@ -4,7 +4,9 @@ import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
 import model.UserData;
+import request.LoginRequest;
 import request.RegisterRequest;
+import response.LoginResponse;
 import response.RegisterResponse;
 
 public class UserService {
@@ -37,5 +39,22 @@ public class UserService {
         }
     }
 
+    public LoginResponse login(LoginRequest request) throws ServiceException {
+        UserData user = userDAO.readUser(request.username());
+        if (user == null) {
+            throw new NotFoundException("User " + request.username() + " not found.");
+        }
+
+        if (!user.password().equals(request.password())) {
+            throw new NotAuthorizedException("Password does not match.");
+        }
+
+        try {
+            var auth = authDAO.createAuth(user);
+            return new LoginResponse(user.username(), auth.authToken());
+        } catch (DataAccessException e) {
+            throw new ServiceException("Internal error: Auth");
+        }
+    }
 
 }
