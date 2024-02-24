@@ -7,17 +7,19 @@ import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 public class UserDAOTests {
-    public UserDAO userDAO;
-
-    @BeforeEach
-    public void setUp() {
-        userDAO = new MemoryUserDAO();
+    static Stream<UserDAO> implementations() {
+        return Stream.of(new MemoryUserDAO()/*, new SQLUserDAO() */);
     }
 
-    @Test
-    public void CantInsertUserTwice() {
+    @ParameterizedTest
+    @MethodSource("implementations")
+    public void CantInsertUserTwice(UserDAO userDAO) {
         UserData user = new UserData("name", "password", "email@email.com");
         Assertions.assertDoesNotThrow(() -> {
             userDAO.insertUser(user);
