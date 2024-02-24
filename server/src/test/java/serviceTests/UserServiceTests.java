@@ -2,9 +2,11 @@ package serviceTests;
 
 import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryUserDAO;
+import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import request.LoginRequest;
+import request.LogoutRequest;
 import request.RegisterRequest;
 import service.NotAuthorizedException;
 import service.ServiceException;
@@ -50,5 +52,22 @@ public class UserServiceTests {
 
         userService.register(new RegisterRequest(username, password, email));
         Assertions.assertThrows(NotAuthorizedException.class, () -> userService.login(new LoginRequest(username, badPassword)));
+    }
+
+    @Test
+    public void canLogoutUser() throws ServiceException {
+        var userService = getUserService();
+        var user = new UserData("name", "pass", "email@emal.com");
+
+        userService.register(new RegisterRequest(user.username(), user.password(), user.email()));
+        var response = userService.login(new LoginRequest(user.username(), user.password()));
+
+        Assertions.assertDoesNotThrow(() -> userService.logout(new LogoutRequest(response.authToken())));
+    }
+
+    @Test
+    public void cannotLogoutWithBadAuthToken() {
+        var userService = getUserService();
+        Assertions.assertThrows(NotAuthorizedException.class, () -> userService.logout(new LogoutRequest("not a token")));
     }
 }

@@ -5,8 +5,10 @@ import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
 import model.UserData;
 import request.LoginRequest;
+import request.LogoutRequest;
 import request.RegisterRequest;
 import response.LoginResponse;
+import response.LogoutResponse;
 import response.RegisterResponse;
 
 public class UserService {
@@ -57,4 +59,16 @@ public class UserService {
         }
     }
 
+    public LogoutResponse logout(LogoutRequest request) throws ServiceException {
+        if (authDAO.readAuth(request.authToken()) == null) {
+            throw new NotAuthorizedException("authToken does not exist: " + request.authToken());
+        }
+
+        try {
+            authDAO.deleteAuth(request.authToken());
+        } catch (DataAccessException e) {
+            throw new ServiceException("Internal error: Auth");
+        }
+        return new LogoutResponse();
+    }
 }
