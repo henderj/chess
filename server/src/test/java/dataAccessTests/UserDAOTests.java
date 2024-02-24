@@ -37,13 +37,13 @@ public class UserDAOTests {
     public void canCreateAndGetUser(UserDAO userDAO) {
         UserData user = new UserData("name", "password", "email@email.com");
         Assertions.assertDoesNotThrow(() -> userDAO.insertUser(user));
-        Assertions.assertDoesNotThrow(() -> Assertions.assertEquals(user, userDAO.readUser(user.username())));
+        Assertions.assertEquals(user, userDAO.readUser(user.username()));
     }
 
     @ParameterizedTest
     @MethodSource("implementations")
     public void getNonexistentUserReturnsNull(UserDAO userDAO) {
-       Assertions.assertDoesNotThrow(() -> Assertions.assertNull(userDAO.readUser("not_a_name")));
+       Assertions.assertNull(userDAO.readUser("not_a_name"));
     }
 
     @ParameterizedTest
@@ -52,7 +52,7 @@ public class UserDAOTests {
         UserData user = new UserData("name", "password", "email@email.com");
         Assertions.assertDoesNotThrow(() -> userDAO.insertUser(user));
         userDAO.clear();
-        Assertions.assertDoesNotThrow(() -> Assertions.assertNull(userDAO.readUser(user.username())));
+        Assertions.assertNull(userDAO.readUser(user.username()));
     }
 
 }
