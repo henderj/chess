@@ -2,7 +2,7 @@ package service;
 
 public class NotFoundException extends ServiceException{
     public NotFoundException(String message) {
-        super(406, message);
+        super(401, message);
     }
 
     public NotFoundException() {

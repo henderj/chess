@@ -45,6 +45,9 @@ public class UserService {
     }
 
     public LoginResponse login(LoginRequest request) throws ServiceException {
+        if (request.username() == null || request.password() == null) {
+            throw new BadRequestException();
+        }
         UserData user = userDAO.readUser(request.username());
         if (user == null) {
             throw new NotFoundException("User " + request.username() + " not found.");
@@ -63,6 +66,9 @@ public class UserService {
     }
 
     public LogoutResponse logout(LogoutRequest request) throws ServiceException {
+        if (request.authToken() == null) {
+            throw new BadRequestException();
+        }
         if (authDAO.readAuth(request.authToken()) == null) {
             throw new NotAuthorizedException("authToken does not exist: " + request.authToken());
         }

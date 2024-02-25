@@ -6,6 +6,8 @@ import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryGameDAO;
 import dataAccess.MemoryUserDAO;
 import dataAccess.UserDAO;
+import request.LoginRequest;
+import request.LogoutRequest;
 import request.RegisterRequest;
 import response.ErrorResponse;
 import service.AlreadyTakenException;
@@ -38,6 +40,8 @@ public class Server {
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", this::handleClear);
         Spark.post("/user", this::handleRegister);
+        Spark.post("/session", this::handleLogin);
+        Spark.delete("/session", this::handleLogout);
 
         Spark.exception(ServiceException.class, this::handleException);
 
@@ -53,9 +57,7 @@ public class Server {
 
     private Object handleClear(Request req, Response res) {
         res.type(RESPONSE_TYPE);
-
         clearService.clear();
-
         res.status(200);
         return "{}";
     }
@@ -66,6 +68,22 @@ public class Server {
         var registerResponse = userService.register(registerRequest);
         res.status(200);
         return new Gson().toJson(registerResponse);
+    }
+
+    private Object handleLogin(Request req, Response res) throws ServiceException {
+        res.type(RESPONSE_TYPE);
+        var loginRequest = new Gson().fromJson(req.body(), LoginRequest.class);
+        var loginResponse = userService.login(loginRequest);
+        res.status(200);
+        return new Gson().toJson(loginResponse);
+    }
+
+    private Object handleLogout(Request req, Response res) throws ServiceException {
+        res.type(RESPONSE_TYPE);
+        var logoutRequest = new LogoutRequest(req.headers("Authorization"));
+        var logoutResponse = userService.logout(logoutRequest);
+        res.status(200);
+        return new Gson().toJson(logoutResponse);
     }
 
     public void stop() {
