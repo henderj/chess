@@ -4,12 +4,12 @@ import com.google.gson.Gson;
 import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryGameDAO;
 import dataAccess.MemoryUserDAO;
-import request.LoginRequest;
-import request.LogoutRequest;
-import request.RegisterRequest;
+import request.*;
 import response.ErrorResponse;
+import response.ListGamesResponse;
 import service.ClearService;
 import exception.ServiceException;
+import service.GameService;
 import service.UserService;
 import spark.*;
 
@@ -19,6 +19,7 @@ public class Server {
 
     private final UserService userService;
     private final ClearService clearService;
+    private final GameService gameService;
 
     public Server() {
         var userDOA = new MemoryUserDAO();
@@ -27,6 +28,7 @@ public class Server {
 
         userService = new UserService(userDOA, authDOA);
         clearService = new ClearService(userDOA, authDOA, gameDOA);
+        gameService = new GameService(userDOA, authDOA, gameDOA);
     }
 
     public int run(int desiredPort) {
@@ -39,6 +41,9 @@ public class Server {
         Spark.post("/user", this::handleRegister);
         Spark.post("/session", this::handleLogin);
         Spark.delete("/session", this::handleLogout);
+        Spark.post("/game", this::handleCreateGame);
+        Spark.put("/game", this::handleJoinGame);
+        Spark.get("/game", this::handleListGame);
 
         Spark.exception(ServiceException.class, this::handleException);
 
@@ -81,6 +86,32 @@ public class Server {
         var logoutResponse = userService.logout(logoutRequest);
         res.status(200);
         return new Gson().toJson(logoutResponse);
+    }
+
+    private Object handleCreateGame(Request req, Response res) throws ServiceException {
+        res.type(RESPONSE_TYPE);
+        var createGameRequest = new Gson().fromJson(req.body(), CreateGameRequest.class);
+        createGameRequest = new CreateGameRequest(req.headers("Authorization"), createGameRequest.gameName());
+        var createGameResponse = gameService.createGame(createGameRequest);
+        res.status(200);
+        return new Gson().toJson(createGameResponse);
+    }
+
+    private Object handleJoinGame(Request req, Response res) throws ServiceException {
+        res.type(RESPONSE_TYPE);
+        var joinGameRequest = new Gson().fromJson(req.body(), JoinGameRequest.class);
+        joinGameRequest = new JoinGameRequest(req.headers("Authorization"), joinGameRequest.playerColor(), joinGameRequest.gameID());
+        var joinGameResponse = gameService.joinGame(joinGameRequest);
+        res.status(200);
+        return new Gson().toJson(joinGameResponse);
+    }
+
+    private Object handleListGame(Request req, Response res) throws ServiceException {
+        res.type(RESPONSE_TYPE);
+        var listGameRequest = new ListGamesRequest(req.headers("Authorization"));
+        var listGameResponse = gameService.listGames(listGameRequest);
+        res.status(200);
+        return new Gson().toJson(listGameResponse);
     }
 
     public void stop() {
