@@ -6,7 +6,6 @@ import dataAccess.MemoryGameDAO;
 import dataAccess.MemoryUserDAO;
 import request.*;
 import response.ErrorResponse;
-import response.ListGamesResponse;
 import service.ClearService;
 import exception.ServiceException;
 import service.GameService;
@@ -28,7 +27,7 @@ public class Server {
 
         userService = new UserService(userDOA, authDOA);
         clearService = new ClearService(userDOA, authDOA, gameDOA);
-        gameService = new GameService(userDOA, authDOA, gameDOA);
+        gameService = new GameService(authDOA, gameDOA);
     }
 
     public int run(int desiredPort) {
