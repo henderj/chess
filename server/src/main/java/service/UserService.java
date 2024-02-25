@@ -22,6 +22,9 @@ public class UserService {
     }
 
     public RegisterResponse register(RegisterRequest request) throws ServiceException {
+        if (request.username() == null || request.password() == null || request.email() == null) {
+            throw new BadRequestException();
+        }
         if (userDAO.readUser(request.username()) != null) {
             throw new AlreadyTakenException("Username " + request.username() + " already taken.");
         }
@@ -30,14 +33,14 @@ public class UserService {
         try {
             userDAO.insertUser(user);
         } catch (DataAccessException e) {
-            throw new ServiceException("Internal error: User");
+            throw new ServiceException(500, "Internal error: User");
         }
 
         try {
             var auth = authDAO.createAuth(user);
             return new RegisterResponse(user.username(), auth.authToken());
         } catch (DataAccessException e) {
-            throw new ServiceException("Internal error: Auth");
+            throw new ServiceException(500, "Internal error: Auth");
         }
     }
 
@@ -55,7 +58,7 @@ public class UserService {
             var auth = authDAO.createAuth(user);
             return new LoginResponse(user.username(), auth.authToken());
         } catch (DataAccessException e) {
-            throw new ServiceException("Internal error: Auth");
+            throw new ServiceException(500, "Internal error: Auth");
         }
     }
 
@@ -67,7 +70,7 @@ public class UserService {
         try {
             authDAO.deleteAuth(request.authToken());
         } catch (DataAccessException e) {
-            throw new ServiceException("Internal error: Auth");
+            throw new ServiceException(500, "Internal error: Auth");
         }
         return new LogoutResponse();
     }
