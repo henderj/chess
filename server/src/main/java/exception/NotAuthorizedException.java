@@ -1,4 +1,4 @@
-package service;
+package exception;
 
 public class NotAuthorizedException extends ServiceException{
     public NotAuthorizedException(String message) {

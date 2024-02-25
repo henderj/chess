@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import request.LoginRequest;
 import request.LogoutRequest;
 import request.RegisterRequest;
-import service.NotAuthorizedException;
-import service.ServiceException;
+import exception.NotAuthorizedException;
+import exception.ServiceException;
 import service.UserService;
 
 public class UserServiceTests {

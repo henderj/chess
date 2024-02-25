@@ -1,18 +1,15 @@
 package server;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryGameDAO;
 import dataAccess.MemoryUserDAO;
-import dataAccess.UserDAO;
 import request.LoginRequest;
 import request.LogoutRequest;
 import request.RegisterRequest;
 import response.ErrorResponse;
-import service.AlreadyTakenException;
 import service.ClearService;
-import service.ServiceException;
+import exception.ServiceException;
 import service.UserService;
 import spark.*;
 
