@@ -3,7 +3,6 @@ package chess;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ChessPieceMoves {
@@ -27,32 +26,32 @@ public class ChessPieceMoves {
         HashSet<ChessMove> moves = new HashSet<>();
 
         for (int i = 1; i <= distance; i++) {
-            var NE = new ChessPosition(position.row() + i, position.col() + i);
-            var move = new ChessMove(position, NE);
+            var ne = new ChessPosition(position.row() + i, position.col() + i);
+            var move = new ChessMove(position, ne);
             if (!isValid(board, move, color)) break;
             moves.add(move);
             if (isCapture(board, move, color)) break;
         }
 
         for (int i = 1; i <= distance; i++) {
-            var SE = new ChessPosition(position.row() - i, position.col() + i);
-            var move = new ChessMove(position, SE);
+            var se = new ChessPosition(position.row() - i, position.col() + i);
+            var move = new ChessMove(position, se);
             if (!isValid(board, move, color)) break;
             moves.add(move);
             if (isCapture(board, move, color)) break;
         }
 
         for (int i = 1; i <= distance; i++) {
-            var SW = new ChessPosition(position.row() - i, position.col() - i);
-            var move = new ChessMove(position, SW);
+            var sw = new ChessPosition(position.row() - i, position.col() - i);
+            var move = new ChessMove(position, sw);
             if (!isValid(board, move, color)) break;
             moves.add(move);
             if (isCapture(board, move, color)) break;
         }
 
         for (int i = 1; i <= distance; i++) {
-            var NW = new ChessPosition(position.row() + i, position.col() - i);
-            var move = new ChessMove(position, NW);
+            var nw = new ChessPosition(position.row() + i, position.col() - i);
+            var move = new ChessMove(position, nw);
             if (!isValid(board, move, color)) break;
             moves.add(move);
             if (isCapture(board, move, color)) break;
@@ -81,32 +80,32 @@ public class ChessPieceMoves {
         HashSet<ChessMove> moves = new HashSet<>();
 
         for (int i = 1; i <= distance; i++) {
-            var N = new ChessPosition(position.row() + i, position.col());
-            var move = new ChessMove(position, N);
+            var n = new ChessPosition(position.row() + i, position.col());
+            var move = new ChessMove(position, n);
             if (!isValid(board, move, color)) break;
             moves.add(move);
             if (isCapture(board, move, color)) break;
         }
 
         for (int i = 1; i <= distance; i++) {
-            var E = new ChessPosition(position.row(), position.col() + i);
-            var move = new ChessMove(position, E);
+            var e = new ChessPosition(position.row(), position.col() + i);
+            var move = new ChessMove(position, e);
             if (!isValid(board, move, color)) break;
             moves.add(move);
             if (isCapture(board, move, color)) break;
         }
 
         for (int i = 1; i <= distance; i++) {
-            var S = new ChessPosition(position.row() - i, position.col());
-            var move = new ChessMove(position, S);
+            var s = new ChessPosition(position.row() - i, position.col());
+            var move = new ChessMove(position, s);
             if (!isValid(board, move, color)) break;
             moves.add(move);
             if (isCapture(board, move, color)) break;
         }
 
         for (int i = 1; i <= distance; i++) {
-            var W = new ChessPosition(position.row(), position.col() - i);
-            var move = new ChessMove(position, W);
+            var w = new ChessPosition(position.row(), position.col() - i);
+            var move = new ChessMove(position, w);
             if (!isValid(board, move, color)) break;
             moves.add(move);
             if (isCapture(board, move, color)) break;
@@ -183,13 +182,10 @@ public class ChessPieceMoves {
         @Override
         public boolean equals(Object o) {
             return super.equals(o);
-//            EnPassantChessMove that = (EnPassantChessMove) o;
-//            return Objects.equals(capturedPiecePosition, that.capturedPiecePosition);
         }
 
         @Override
         public int hashCode() {
-//            return Objects.hash(super.hashCode(), capturedPiecePosition);
             return super.hashCode();
         }
     }

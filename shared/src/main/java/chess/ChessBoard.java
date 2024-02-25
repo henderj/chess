@@ -52,20 +52,6 @@ public class ChessBoard {
         return board[8 - position.row()][position.col() - 1];
     }
 
-    public interface PieceOperation {
-        void apply(ChessPosition position, ChessPiece piece);
-    }
-
-    public void forEveryPiece(PieceOperation operation) {
-        for (int row = 1; row <= 8; row++) {
-            for (int col = 1; col <= 8; col++) {
-                var position = new ChessPosition(row, col);
-                var piece = getPiece(position);
-                operation.apply(position, piece);
-            }
-        }
-    }
-
     /**
      * Gets the position of the king.
      *

@@ -38,14 +38,8 @@ public final class ChessPosition {
         return new ChessPosition(row + 1, col);
     }
 
-    public ChessPosition east(){
-        return new ChessPosition(row, col + 1);
-    }
     public ChessPosition south() {
         return new ChessPosition(row - 1, col);
-    }
-    public ChessPosition west() {
-        return new ChessPosition(row, col - 1);
     }
 
     @Override
