@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import dataAccess.DatabaseManager;
 import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryGameDAO;
 import dataAccess.MemoryUserDAO;
@@ -21,6 +22,8 @@ public class Server {
     private final GameService gameService;
 
     public Server() {
+        var databaseManager = new DatabaseManager();
+
         var userDOA = new MemoryUserDAO();
         var authDOA = new MemoryAuthDAO();
         var gameDOA = new MemoryGameDAO();

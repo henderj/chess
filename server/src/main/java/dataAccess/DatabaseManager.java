@@ -9,6 +9,8 @@ public class DatabaseManager {
     private final String password;
     private final String connectionUrl;
 
+    private boolean databaseInitialized = false;
+
     public DatabaseManager() {
         try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
             if (propStream == null) throw new Exception("Unable to load db.properties");
@@ -29,10 +31,48 @@ public class DatabaseManager {
     /**
      * Creates the database if it does not already exist.
      */
-    public void createDatabase() throws DataAccessException {
+    private void createDatabase() throws DataAccessException {
         try {
             var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
             var conn = DriverManager.getConnection(connectionUrl, user, password);
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    private void createTables() throws DataAccessException {
+        try {
+            var statement = """
+                    CREATE TABLE IF NOT EXISTS user (
+                        username VARCHAR(255) NOT NULL,
+                        password VARCHAR(255) NOT NULL,
+                        email VARCHAR(255) NOT NULL,
+                        PRIMARY KEY (username)
+                    );
+                                        
+                    CREATE TABLE IF NOT EXISTS auth (
+                        authToken VARCHAR(255) NOT NULL,
+                        username VARCHAR(255) NOT NULL,
+                        PRIMARY KEY (authToken),
+                        FOREIGN KEY (username) REFERENCES user(username)
+                    );
+                        
+                    CREATE TABLE IF NOT EXISTS game (
+                        id INT NOT NULL AUTO_INCREMENT,
+                        whiteUsername VARCHAR(255),
+                        blackUsername VARCHAR(255),
+                        gameName VARCHAR(255) NOT NULL,
+                        gameData VARCHAR(1024),
+                        PRIMARY KEY (id),
+                        FOREIGN KEY (whiteUsername) REFERENCES user(username),
+                        FOREIGN KEY (blackUsername) REFERENCES user(username)
+                    );
+                    """;
+            var conn = DriverManager.getConnection(connectionUrl, user, password);
+            conn.setCatalog(databaseName);
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.executeUpdate();
             }
@@ -54,6 +94,11 @@ public class DatabaseManager {
      * </code>
      */
     public Connection getConnection() throws DataAccessException {
+        if (!databaseInitialized) {
+            createDatabase();
+            createTables();
+            databaseInitialized = true;
+        }
         try {
             var conn = DriverManager.getConnection(connectionUrl, user, password);
             conn.setCatalog(databaseName);

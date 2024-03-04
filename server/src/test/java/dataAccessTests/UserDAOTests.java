@@ -1,8 +1,6 @@
 package dataAccessTests;
 
-import dataAccess.DataAccessException;
-import dataAccess.MemoryUserDAO;
-import dataAccess.UserDAO;
+import dataAccess.*;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,8 +9,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.stream.Stream;
 
 public class UserDAOTests {
+
     static Stream<UserDAO> implementations() {
-        return Stream.of(new MemoryUserDAO()/*, new SQLUserDAO() */);
+        return Stream.of(new MemoryUserDAO(), new SQLUserDAO(new DatabaseManager()));
     }
 
     @ParameterizedTest
