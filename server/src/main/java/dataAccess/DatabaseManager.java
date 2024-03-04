@@ -4,28 +4,23 @@ import java.sql.*;
 import java.util.Properties;
 
 public class DatabaseManager {
-    private static final String databaseName;
-    private static final String user;
-    private static final String password;
-    private static final String connectionUrl;
+    private final String databaseName;
+    private final String user;
+    private final String password;
+    private final String connectionUrl;
 
-    /*
-     * Load the database information for the db.properties file.
-     */
-    static {
-        try {
-            try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
-                if (propStream == null) throw new Exception("Unable to laod db.properties");
-                Properties props = new Properties();
-                props.load(propStream);
-                databaseName = props.getProperty("db.name");
-                user = props.getProperty("db.user");
-                password = props.getProperty("db.password");
+    public DatabaseManager() {
+        try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
+            if (propStream == null) throw new Exception("Unable to load db.properties");
+            Properties props = new Properties();
+            props.load(propStream);
+            databaseName = props.getProperty("db.name");
+            user = props.getProperty("db.user");
+            password = props.getProperty("db.password");
 
-                var host = props.getProperty("db.host");
-                var port = Integer.parseInt(props.getProperty("db.port"));
-                connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
-            }
+            var host = props.getProperty("db.host");
+            var port = Integer.parseInt(props.getProperty("db.port"));
+            connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
         } catch (Exception ex) {
             throw new RuntimeException("unable to process db.properties. " + ex.getMessage());
         }
@@ -34,7 +29,7 @@ public class DatabaseManager {
     /**
      * Creates the database if it does not already exist.
      */
-    static void createDatabase() throws DataAccessException {
+    public void createDatabase() throws DataAccessException {
         try {
             var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
             var conn = DriverManager.getConnection(connectionUrl, user, password);
@@ -58,7 +53,7 @@ public class DatabaseManager {
      * }
      * </code>
      */
-    static Connection getConnection() throws DataAccessException {
+    public Connection getConnection() throws DataAccessException {
         try {
             var conn = DriverManager.getConnection(connectionUrl, user, password);
             conn.setCatalog(databaseName);
