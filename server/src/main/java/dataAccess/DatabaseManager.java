@@ -68,10 +68,8 @@ public class DatabaseManager {
                         whiteUsername VARCHAR(255),
                         blackUsername VARCHAR(255),
                         gameName VARCHAR(255) NOT NULL,
-                        gameData VARCHAR(1024),
-                        PRIMARY KEY (id),
-                        FOREIGN KEY (whiteUsername) REFERENCES user(username),
-                        FOREIGN KEY (blackUsername) REFERENCES user(username)
+                        gameState VARCHAR(1024),
+                        PRIMARY KEY (id)
                     );
                     """};
             var conn = DriverManager.getConnection(connectionUrl, user, password);

@@ -3,7 +3,6 @@ package service;
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
-import dataAccess.UserDAO;
 import exception.AlreadyTakenException;
 import exception.BadRequestException;
 import exception.NotAuthorizedException;
@@ -55,26 +54,26 @@ public class GameService {
             throw new BadRequestException("playerColor must be 'WHITE' or 'BLACK' or null");
         }
 
-        var game = gameDAO.readGame(request.gameID());
-        if (game == null) {
-            throw new BadRequestException("Game with id " + request.gameID() + " does not exist");
-        }
-
-        if (request.playerColor() != null) {
-            if (request.playerColor().equals("WHITE")) {
-                if (game.whiteUsername() != null) {
-                    throw new AlreadyTakenException("White user has already joined");
-                }
-                game = game.addWhiteUsername(authData.username());
-            } else {
-                if (game.blackUsername() != null) {
-                    throw new AlreadyTakenException("Black user has already joined");
-                }
-                game = game.addBlackUsername(authData.username());
-            }
-        }
-
         try {
+            var game = gameDAO.readGame(request.gameID());
+            if (game == null) {
+                throw new BadRequestException("Game with id " + request.gameID() + " does not exist");
+            }
+
+            if (request.playerColor() != null) {
+                if (request.playerColor().equals("WHITE")) {
+                    if (game.whiteUsername() != null) {
+                        throw new AlreadyTakenException("White user has already joined");
+                    }
+                    game = game.addWhiteUsername(authData.username());
+                } else {
+                    if (game.blackUsername() != null) {
+                        throw new AlreadyTakenException("Black user has already joined");
+                    }
+                    game = game.addBlackUsername(authData.username());
+                }
+            }
+
             gameDAO.updateGame(game);
             return new JoinGameResponse();
         } catch (DataAccessException e) {
@@ -85,20 +84,27 @@ public class GameService {
     public ListGamesResponse listGames(ListGamesRequest request) throws ServiceException {
         authenticate(request.authToken());
 
-        Collection<GameData> gameDataCollection = gameDAO.listGames();
-
-        return new ListGamesResponse(gameDataCollection.toArray(new GameData[0]));
+        try {
+            Collection<GameData> gameDataCollection = gameDAO.listGames();
+            return new ListGamesResponse(gameDataCollection.toArray(new GameData[0]));
+        } catch (DataAccessException e) {
+            throw new ServiceException(500, "Error reading games: " + e.getMessage());
+        }
     }
 
-    private AuthData authenticate(String authToken) throws NotAuthorizedException {
+    private AuthData authenticate(String authToken) throws ServiceException {
         if (authToken == null) {
             throw new NotAuthorizedException();
         }
-        AuthData authData = authDAO.readAuth(authToken);
-        if (authData == null) {
-            throw new NotAuthorizedException();
+        try {
+            AuthData authData = authDAO.readAuth(authToken);
+            if (authData == null) {
+                throw new NotAuthorizedException();
+            }
+            return authData;
+        } catch (DataAccessException e) {
+            throw new ServiceException(500, "Internal error: Auth");
         }
-        return authData;
     }
 
 }

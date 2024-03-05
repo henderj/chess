@@ -7,11 +7,11 @@ import java.util.Collection;
 public interface GameDAO {
     GameData createGame(String gameName) throws DataAccessException;
 
-    GameData readGame(int gameID);
+    GameData readGame(int gameID) throws DataAccessException;
 
-    Collection<GameData> listGames();
+    Collection<GameData> listGames() throws DataAccessException;
 
     void updateGame(GameData gameData) throws DataAccessException;
 
-    void clear();
+    void clear() throws DataAccessException;
 }

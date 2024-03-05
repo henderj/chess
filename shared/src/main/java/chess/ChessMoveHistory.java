@@ -2,12 +2,12 @@ package chess;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Objects;
 
 public class ChessMoveHistory {
-    private Deque<AppliedChessMove> moveHistory;
 
     private ChessPosition enPassantPosition = null;
-    private ChessPieceMoves.EnPassantChessMove enPassantChessMove = null;
+    private final ChessPieceMoves.EnPassantChessMove enPassantChessMove = null;
     private boolean whiteRookKingSideMoved = false;
     private boolean whiteRookQueenSideMoved = false;
     private boolean whiteKingMoved = false;
@@ -16,7 +16,6 @@ public class ChessMoveHistory {
     private boolean blackKingMoved = false;
 
     public ChessMoveHistory() {
-        moveHistory = new ArrayDeque<>();
     }
 
     public boolean canCastleKingSide(ChessGame.TeamColor color) {
@@ -30,7 +29,6 @@ public class ChessMoveHistory {
     }
 
     public void pushMove(AppliedChessMove move) {
-        moveHistory.push(move);
 
         var piece = move.getPiece();
         var type = piece.getPieceType();
@@ -66,5 +64,21 @@ public class ChessMoveHistory {
 
     public ChessPosition getEnPassantPosition() {
         return enPassantPosition;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessMoveHistory that = (ChessMoveHistory) o;
+        return whiteRookKingSideMoved == that.whiteRookKingSideMoved && whiteRookQueenSideMoved == that.whiteRookQueenSideMoved && whiteKingMoved == that.whiteKingMoved && blackRookKingSideMoved == that.blackRookKingSideMoved && blackRookQueenSideMoved == that.blackRookQueenSideMoved && blackKingMoved == that.blackKingMoved && Objects.equals(
+                enPassantPosition, that.enPassantPosition) && Objects.equals(enPassantChessMove,
+                                                                             that.enPassantChessMove);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(enPassantPosition, enPassantChessMove, whiteRookKingSideMoved, whiteRookQueenSideMoved,
+                            whiteKingMoved, blackRookKingSideMoved, blackRookQueenSideMoved, blackKingMoved);
     }
 }
