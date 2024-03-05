@@ -1,8 +1,6 @@
 package chess;
 
-import java.util.ArrayDeque;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.Objects;
 
 /**
