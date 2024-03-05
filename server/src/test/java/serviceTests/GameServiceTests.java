@@ -22,8 +22,13 @@ public class GameServiceTests {
 
     @BeforeEach
     public void setup() {
-        gameDAO = new MemoryGameDAO();
-        authDAO = new MemoryAuthDAO();
+//        gameDAO = new MemoryGameDAO();
+//        authDAO = new MemoryAuthDAO();
+//        gameService = new GameService(authDAO, gameDAO);
+
+        var db = new DatabaseManager();
+        gameDAO = new SQLGameDAO(db);
+        authDAO = new SQLAuthDAO(db);
         gameService = new GameService(authDAO, gameDAO);
     }
 
@@ -50,7 +55,8 @@ public class GameServiceTests {
     @Test
     public void cannotJoinGameBadGameID() throws DataAccessException {
         AuthData auth = authDAO.createAuth(new UserData("name", "pass", "email"));
-        Assertions.assertThrows(ServiceException.class, () -> gameService.joinGame(new JoinGameRequest(auth.authToken(), "WHITE", 12)));
+        Assertions.assertThrows(ServiceException.class,
+                                () -> gameService.joinGame(new JoinGameRequest(auth.authToken(), "WHITE", 12)));
     }
 
     @Test
@@ -59,7 +65,9 @@ public class GameServiceTests {
         Assertions.assertDoesNotThrow(() -> gameService.listGames(new ListGamesRequest(auth.authToken())));
     }
 
-    @Test void cannotListGamesBadAuth() {
-        Assertions.assertThrows(NotAuthorizedException.class, () -> gameService.listGames(new ListGamesRequest("not an auth")));
+    @Test
+    void cannotListGamesBadAuth() {
+        Assertions.assertThrows(NotAuthorizedException.class,
+                                () -> gameService.listGames(new ListGamesRequest("not an auth")));
     }
 }
