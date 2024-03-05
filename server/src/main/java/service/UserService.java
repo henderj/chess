@@ -5,6 +5,7 @@ import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
 import exception.*;
 import model.UserData;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import request.LoginRequest;
 import request.LogoutRequest;
 import request.RegisterRequest;
@@ -34,7 +35,7 @@ public class UserService {
             throw new ServiceException(500, "Internal error: User");
         }
 
-        UserData user = new UserData(request.username(), request.password(), request.email());
+        UserData user = new UserData(request.username(), encryptPassword(request.password()), request.email());
         try {
             userDAO.insertUser(user);
         } catch (DataAccessException e) {
@@ -59,7 +60,7 @@ public class UserService {
                 throw new NotFoundException("User " + request.username() + " not found.");
             }
 
-            if (!user.password().equals(request.password())) {
+            if (!passwordsMatch(request.password(), user.password())) {
                 throw new NotAuthorizedException("Password does not match.");
             }
 
@@ -85,4 +86,14 @@ public class UserService {
         }
         return new LogoutResponse();
     }
+    private String encryptPassword(String password) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        return encoder.encode(password);
+    }
+
+    private boolean passwordsMatch(String clearTextPassword, String hashedPassword) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        return encoder.matches(clearTextPassword, hashedPassword);
+    }
+
 }
