@@ -1,8 +1,6 @@
 package dataAccessTests;
 
-import dataAccess.AuthDAO;
-import dataAccess.DataAccessException;
-import dataAccess.MemoryAuthDAO;
+import dataAccess.*;
 import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
@@ -15,12 +13,13 @@ public class AuthDAOTests {
 
 
     static Stream<AuthDAO> implementations() {
-        return Stream.of(new MemoryAuthDAO()/*, new SQLAuthDAO() */);
+        return Stream.of(new MemoryAuthDAO(), new SQLAuthDAO(new DatabaseManager()));
     }
 
     @ParameterizedTest
     @MethodSource("implementations")
     public void canCreateAndGetAuth(AuthDAO authDAO) throws DataAccessException {
+        authDAO.clear();
         UserData user = new UserData("name", "password", "email@email.com");
         AuthData auth = authDAO.createAuth(user);
         Assertions.assertEquals(auth, authDAO.readAuth(auth.authToken()));
@@ -29,6 +28,7 @@ public class AuthDAOTests {
     @ParameterizedTest
     @MethodSource("implementations")
     public void canCreateTwoAuths(AuthDAO authDAO) throws DataAccessException {
+        authDAO.clear();
         UserData user = new UserData("name", "password", "email@email.com");
         authDAO.createAuth(user);
         Assertions.assertDoesNotThrow(() -> authDAO.createAuth(user));
@@ -36,13 +36,15 @@ public class AuthDAOTests {
 
     @ParameterizedTest
     @MethodSource("implementations")
-    public void getNonexistentAuthReturnsNull(AuthDAO authDAO) {
+    public void getNonexistentAuthReturnsNull(AuthDAO authDAO) throws DataAccessException {
+        authDAO.clear();
         Assertions.assertNull(authDAO.readAuth("not_an_auth"));
     }
 
     @ParameterizedTest
     @MethodSource("implementations")
     public void canDeleteAuth(AuthDAO authDAO) throws DataAccessException {
+        authDAO.clear();
         UserData user = new UserData("name", "password", "email@email.com");
         AuthData auth = authDAO.createAuth(user);
         Assertions.assertEquals(auth, authDAO.readAuth(auth.authToken()));
@@ -53,6 +55,7 @@ public class AuthDAOTests {
     @ParameterizedTest
     @MethodSource("implementations")
     public void clearRemovesAuths(AuthDAO authDAO) throws DataAccessException {
+        authDAO.clear();
         UserData user = new UserData("name", "password", "email@email.com");
         AuthData auth = authDAO.createAuth(user);
         Assertions.assertEquals(auth, authDAO.readAuth(auth.authToken()));

@@ -74,11 +74,11 @@ public class UserService {
         if (request.authToken() == null) {
             throw new BadRequestException();
         }
-        if (authDAO.readAuth(request.authToken()) == null) {
-            throw new NotAuthorizedException("authToken does not exist: " + request.authToken());
-        }
-
         try {
+            if (authDAO.readAuth(request.authToken()) == null) {
+                throw new NotAuthorizedException("authToken does not exist: " + request.authToken());
+            }
+
             authDAO.deleteAuth(request.authToken());
         } catch (DataAccessException e) {
             throw new ServiceException(500, "Internal error: Auth");

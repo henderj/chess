@@ -19,7 +19,7 @@ public class SQLUserDAO implements UserDAO {
             var conn = databaseManager.getConnection();
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, userData.username());
-                preparedStatement.setString(2, userData.password()); // encrypt password
+                preparedStatement.setString(2, userData.password()); // TODO: encrypt password
                 preparedStatement.setString(3, userData.email());
 
                 preparedStatement.executeUpdate();

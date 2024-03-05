@@ -93,6 +93,20 @@ public class DatabaseManager {
         databaseInitialized = true;
     }
 
+    public void clearTables() throws DataAccessException {
+        try {
+            var conn = getConnection();
+            String[] statements = {"DELETE FROM game", "DELETE FROM auth", "DELETE FROM user"};
+            for (var statement : statements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
     /**
      * Create a connection to the database and sets the catalog based upon the
      * properties specified in db.properties. Connections to the database should

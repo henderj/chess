@@ -1,7 +1,6 @@
 package serviceTests;
 
-import dataAccess.MemoryAuthDAO;
-import dataAccess.MemoryUserDAO;
+import dataAccess.*;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -13,18 +12,22 @@ import exception.ServiceException;
 import service.UserService;
 
 public class UserServiceTests {
-    private UserService getUserService() {
-        return new UserService(new MemoryUserDAO(), new MemoryAuthDAO());
+
+    private UserService getUserService() throws DataAccessException {
+//        return new UserService(new MemoryUserDAO(), new MemoryAuthDAO());
+        var db = new DatabaseManager();
+        db.clearTables();
+        return new UserService(new SQLUserDAO(db), new SQLAuthDAO(db));
     }
 
     @Test
-    public void canRegisterNewUser() {
+    public void canRegisterNewUser() throws DataAccessException {
         var userService = getUserService();
         Assertions.assertDoesNotThrow(() -> userService.register(new RegisterRequest("name", "password", "email@email.com")));
     }
 
     @Test
-    public void cantRegisterUserTwice() {
+    public void cantRegisterUserTwice() throws DataAccessException {
         var userService = getUserService();
         var request = new RegisterRequest("name", "password", "email@email.com");
         Assertions.assertDoesNotThrow(() -> userService.register(request));
@@ -32,7 +35,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void canLoginExistingUser() throws ServiceException {
+    public void canLoginExistingUser() throws ServiceException, DataAccessException {
         var userService = getUserService();
         var username = "name";
         var password = "password";
@@ -43,7 +46,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void cannotLoginWithBadPassword() throws ServiceException {
+    public void cannotLoginWithBadPassword() throws ServiceException, DataAccessException {
         var userService = getUserService();
         var username = "name";
         var password = "password";
@@ -55,7 +58,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void canLogoutUser() throws ServiceException {
+    public void canLogoutUser() throws ServiceException, DataAccessException {
         var userService = getUserService();
         var user = new UserData("name", "pass", "email@emal.com");
 
@@ -66,7 +69,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void cannotLogoutWithBadAuthToken() {
+    public void cannotLogoutWithBadAuthToken() throws DataAccessException {
         var userService = getUserService();
         Assertions.assertThrows(NotAuthorizedException.class, () -> userService.logout(new LogoutRequest("not a token")));
     }
