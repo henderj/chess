@@ -59,7 +59,7 @@ public class Server {
         res.body(new Gson().toJson(errorBody));
     }
 
-    private Object handleClear(Request req, Response res) {
+    private Object handleClear(Request req, Response res) throws ServiceException{
         res.type(RESPONSE_TYPE);
         clearService.clear();
         res.status(200);

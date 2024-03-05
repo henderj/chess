@@ -45,21 +45,24 @@ public class DatabaseManager {
 
     private void createTables() throws DataAccessException {
         try {
-            var statement = """
+            String[] statements = {
+                    """
                     CREATE TABLE IF NOT EXISTS user (
                         username VARCHAR(255) NOT NULL,
                         password VARCHAR(255) NOT NULL,
                         email VARCHAR(255) NOT NULL,
                         PRIMARY KEY (username)
                     );
-                                        
+                    """,
+                    """
                     CREATE TABLE IF NOT EXISTS auth (
                         authToken VARCHAR(255) NOT NULL,
                         username VARCHAR(255) NOT NULL,
                         PRIMARY KEY (authToken),
                         FOREIGN KEY (username) REFERENCES user(username)
                     );
-                        
+                    """,
+                    """
                     CREATE TABLE IF NOT EXISTS game (
                         id INT NOT NULL AUTO_INCREMENT,
                         whiteUsername VARCHAR(255),
@@ -70,15 +73,24 @@ public class DatabaseManager {
                         FOREIGN KEY (whiteUsername) REFERENCES user(username),
                         FOREIGN KEY (blackUsername) REFERENCES user(username)
                     );
-                    """;
+                    """};
             var conn = DriverManager.getConnection(connectionUrl, user, password);
             conn.setCatalog(databaseName);
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.executeUpdate();
+            for (var statement : statements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
             }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
+    }
+
+    public void initializeDatabase() throws DataAccessException {
+        if (databaseInitialized) return;
+        createDatabase();
+        createTables();
+        databaseInitialized = true;
     }
 
     /**
@@ -94,11 +106,7 @@ public class DatabaseManager {
      * </code>
      */
     public Connection getConnection() throws DataAccessException {
-        if (!databaseInitialized) {
-            createDatabase();
-            createTables();
-            databaseInitialized = true;
-        }
+        initializeDatabase();
         try {
             var conn = DriverManager.getConnection(connectionUrl, user, password);
             conn.setCatalog(databaseName);

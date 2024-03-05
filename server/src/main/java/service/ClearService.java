@@ -1,8 +1,10 @@
 package service;
 
 import dataAccess.AuthDAO;
+import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
 import dataAccess.UserDAO;
+import exception.ServiceException;
 
 public class ClearService {
     private final UserDAO userDAO;
@@ -15,9 +17,13 @@ public class ClearService {
         this.gameDAO = gameDAO;
     }
 
-    public void clear() {
-        userDAO.clear();
-        authDAO.clear();
-        gameDAO.clear();
+    public void clear() throws ServiceException {
+        try {
+            userDAO.clear();
+            authDAO.clear();
+            gameDAO.clear();
+        } catch (DataAccessException e) {
+            throw new ServiceException(500, "Internal error: Clear");
+        }
     }
 }

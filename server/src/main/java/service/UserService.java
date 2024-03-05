@@ -26,8 +26,12 @@ public class UserService {
         if (request.username() == null || request.password() == null || request.email() == null) {
             throw new BadRequestException();
         }
-        if (userDAO.readUser(request.username()) != null) {
-            throw new AlreadyTakenException("Username " + request.username() + " already taken.");
+        try {
+            if (userDAO.readUser(request.username()) != null) {
+                throw new AlreadyTakenException("Username " + request.username() + " already taken.");
+            }
+        } catch (DataAccessException e) {
+            throw new ServiceException(500, "Internal error: User");
         }
 
         UserData user = new UserData(request.username(), request.password(), request.email());
@@ -49,16 +53,16 @@ public class UserService {
         if (request.username() == null || request.password() == null) {
             throw new BadRequestException();
         }
-        UserData user = userDAO.readUser(request.username());
-        if (user == null) {
-            throw new NotFoundException("User " + request.username() + " not found.");
-        }
-
-        if (!user.password().equals(request.password())) {
-            throw new NotAuthorizedException("Password does not match.");
-        }
-
         try {
+            UserData user = userDAO.readUser(request.username());
+            if (user == null) {
+                throw new NotFoundException("User " + request.username() + " not found.");
+            }
+
+            if (!user.password().equals(request.password())) {
+                throw new NotAuthorizedException("Password does not match.");
+            }
+
             var auth = authDAO.createAuth(user);
             return new LoginResponse(user.username(), auth.authToken());
         } catch (DataAccessException e) {

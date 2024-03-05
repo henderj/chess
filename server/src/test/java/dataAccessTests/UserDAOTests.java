@@ -16,7 +16,8 @@ public class UserDAOTests {
 
     @ParameterizedTest
     @MethodSource("implementations")
-    public void cantInsertUserTwice(UserDAO userDAO) {
+    public void cantInsertUserTwice(UserDAO userDAO) throws DataAccessException {
+        userDAO.clear();
         UserData user = new UserData("name", "password", "email@email.com");
         Assertions.assertDoesNotThrow(() -> userDAO.insertUser(user));
         Assertions.assertThrows(DataAccessException.class, () -> userDAO.insertUser(user));
@@ -24,7 +25,8 @@ public class UserDAOTests {
 
     @ParameterizedTest
     @MethodSource("implementations")
-    public void cantInsertUserWithSameUsername(UserDAO userDAO) {
+    public void cantInsertUserWithSameUsername(UserDAO userDAO) throws DataAccessException {
+        userDAO.clear();
         UserData user = new UserData("name", "password", "email@email.com");
         Assertions.assertDoesNotThrow(() -> userDAO.insertUser(user));
         UserData user2 = new UserData("name", "password2", "email2@email.com");
@@ -33,7 +35,8 @@ public class UserDAOTests {
 
     @ParameterizedTest
     @MethodSource("implementations")
-    public void canCreateAndGetUser(UserDAO userDAO) {
+    public void canCreateAndGetUser(UserDAO userDAO) throws DataAccessException {
+        userDAO.clear();
         UserData user = new UserData("name", "password", "email@email.com");
         Assertions.assertDoesNotThrow(() -> userDAO.insertUser(user));
         Assertions.assertEquals(user, userDAO.readUser(user.username()));
@@ -41,13 +44,15 @@ public class UserDAOTests {
 
     @ParameterizedTest
     @MethodSource("implementations")
-    public void getNonexistentUserReturnsNull(UserDAO userDAO) {
-       Assertions.assertNull(userDAO.readUser("not_a_name"));
+    public void getNonexistentUserReturnsNull(UserDAO userDAO) throws DataAccessException {
+        userDAO.clear();
+        Assertions.assertNull(userDAO.readUser("not_a_name"));
     }
 
     @ParameterizedTest
     @MethodSource("implementations")
-    public void clearRemovesUsers(UserDAO userDAO) {
+    public void clearRemovesUsers(UserDAO userDAO) throws DataAccessException {
+        userDAO.clear();
         UserData user = new UserData("name", "password", "email@email.com");
         Assertions.assertDoesNotThrow(() -> userDAO.insertUser(user));
         userDAO.clear();
