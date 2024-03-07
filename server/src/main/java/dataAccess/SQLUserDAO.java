@@ -60,7 +60,7 @@ public class SQLUserDAO implements UserDAO {
     @Override
     public void clear() throws DataAccessException {
         try {
-            var statement = "DELETE FROM user";
+            var statement = "TRUNCATE TABLE user";
             var conn = databaseManager.getConnection();
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.executeUpdate();

@@ -14,7 +14,6 @@ import service.UserService;
 public class UserServiceTests {
 
     private UserService getUserService() throws DataAccessException {
-//        return new UserService(new MemoryUserDAO(), new MemoryAuthDAO());
         var db = new DatabaseManager();
         db.clearTables();
         return new UserService(new SQLUserDAO(db), new SQLAuthDAO(db));

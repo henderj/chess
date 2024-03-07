@@ -21,9 +21,6 @@ public class Server {
     public Server() {
         var databaseManager = new DatabaseManager();
 
-//        var userDOA = new MemoryUserDAO();
-//        var authDOA = new MemoryAuthDAO();
-//        var gameDOA = new MemoryGameDAO();
         var userDOA = new SQLUserDAO(databaseManager);
         var authDOA = new SQLAuthDAO(databaseManager);
         var gameDOA = new SQLGameDAO(databaseManager);
