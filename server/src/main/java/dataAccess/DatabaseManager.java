@@ -9,6 +9,7 @@ public class DatabaseManager {
     private final String password;
     private final String connectionUrl;
 
+    private Connection connection = null;
     private boolean databaseInitialized = false;
 
     public DatabaseManager() {
@@ -58,8 +59,7 @@ public class DatabaseManager {
                     CREATE TABLE IF NOT EXISTS auth (
                         authToken VARCHAR(255) NOT NULL,
                         username VARCHAR(255) NOT NULL,
-                        PRIMARY KEY (authToken),
-                        FOREIGN KEY (username) REFERENCES user(username)
+                        PRIMARY KEY (authToken)
                     );
                     """,
                     """
@@ -94,7 +94,7 @@ public class DatabaseManager {
     public void clearTables() throws DataAccessException {
         try {
             var conn = getConnection();
-            String[] statements = {"DELETE FROM game", "DELETE FROM auth", "DELETE FROM user"};
+            String[] statements = {"TRUNCATE TABLE game", "TRUNCATE TABLE auth", "TRUNCATE TABLE user"};
             for (var statement : statements) {
                 try (var preparedStatement = conn.prepareStatement(statement)) {
                     preparedStatement.executeUpdate();
@@ -120,9 +120,12 @@ public class DatabaseManager {
     public Connection getConnection() throws DataAccessException {
         initializeDatabase();
         try {
-            var conn = DriverManager.getConnection(connectionUrl, user, password);
-            conn.setCatalog(databaseName);
-            return conn;
+            if (connection != null && connection.isValid(0)) {
+                return connection;
+            }
+            connection = DriverManager.getConnection(connectionUrl, user, password);
+            connection.setCatalog(databaseName);
+            return connection;
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }

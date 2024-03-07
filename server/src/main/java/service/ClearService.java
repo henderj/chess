@@ -19,9 +19,9 @@ public class ClearService {
 
     public void clear() throws ServiceException {
         try {
-            userDAO.clear();
-            authDAO.clear();
             gameDAO.clear();
+            authDAO.clear();
+            userDAO.clear();
         } catch (DataAccessException e) {
             throw new ServiceException(500, "Internal error: Clear");
         }

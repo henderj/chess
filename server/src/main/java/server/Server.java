@@ -1,10 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
-import dataAccess.DatabaseManager;
-import dataAccess.MemoryAuthDAO;
-import dataAccess.MemoryGameDAO;
-import dataAccess.MemoryUserDAO;
+import dataAccess.*;
 import request.*;
 import response.ErrorResponse;
 import service.ClearService;
@@ -24,9 +21,12 @@ public class Server {
     public Server() {
         var databaseManager = new DatabaseManager();
 
-        var userDOA = new MemoryUserDAO();
-        var authDOA = new MemoryAuthDAO();
-        var gameDOA = new MemoryGameDAO();
+//        var userDOA = new MemoryUserDAO();
+//        var authDOA = new MemoryAuthDAO();
+//        var gameDOA = new MemoryGameDAO();
+        var userDOA = new SQLUserDAO(databaseManager);
+        var authDOA = new SQLAuthDAO(databaseManager);
+        var gameDOA = new SQLGameDAO(databaseManager);
 
         userService = new UserService(userDOA, authDOA);
         clearService = new ClearService(userDOA, authDOA, gameDOA);
@@ -59,7 +59,7 @@ public class Server {
         res.body(new Gson().toJson(errorBody));
     }
 
-    private Object handleClear(Request req, Response res) throws ServiceException{
+    private Object handleClear(Request req, Response res) throws ServiceException {
         res.type(RESPONSE_TYPE);
         clearService.clear();
         res.status(200);
@@ -102,7 +102,8 @@ public class Server {
     private Object handleJoinGame(Request req, Response res) throws ServiceException {
         res.type(RESPONSE_TYPE);
         var joinGameRequest = new Gson().fromJson(req.body(), JoinGameRequest.class);
-        joinGameRequest = new JoinGameRequest(req.headers("Authorization"), joinGameRequest.playerColor(), joinGameRequest.gameID());
+        joinGameRequest = new JoinGameRequest(req.headers("Authorization"), joinGameRequest.playerColor(),
+                                              joinGameRequest.gameID());
         var joinGameResponse = gameService.joinGame(joinGameRequest);
         res.status(200);
         return new Gson().toJson(joinGameResponse);
