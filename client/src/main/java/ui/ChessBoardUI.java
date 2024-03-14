@@ -1,5 +1,9 @@
 package ui;
 
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessPosition;
+
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -17,26 +21,19 @@ public class ChessBoardUI {
     public static void main(String[] args) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         var ui = new ChessBoardUI();
-        String[][] board = new String[8][8];
-        for (String[] strings : board) {
-            Arrays.fill(strings, " ");
-        }
-        board[2][5] = "K";
-        board[0][6] = "q";
-        board[5][7] = "R";
-        board[4][0] = "b";
+        var board = new ChessBoard();
+        board.resetBoard();
         var displayString = ui.buildChessBoardDisplayString(board);
         out.println(displayString);
     }
 
-    public String buildChessBoardDisplayString(String[][] chessBoard) {
+    public String buildChessBoardDisplayString(ChessBoard chessBoard) {
         StringBuilder displayString = new StringBuilder();
         displayString.append(buildLetterCoordString(true));
         displayString.append('\n');
         var start_bg_1 = true;
-        for (int i = 0; i < chessBoard.length; i++) {
-            String[] row = chessBoard[i];
-            displayString.append(buildRow(row, chessBoard.length - i, start_bg_1));
+        for (int i = 8; i > 0; i--) {
+            displayString.append(buildRow(chessBoard, i, start_bg_1));
             displayString.append('\n');
             start_bg_1 = !start_bg_1;
         }
@@ -59,23 +56,29 @@ public class ChessBoardUI {
         return string.toString();
     }
 
-    private String buildRow(String[] row, int index, boolean start_bg_1) {
+    private String buildRow(ChessBoard board, int row, boolean start_bg_1) {
         StringBuilder string = new StringBuilder();
 
         string.append(COORD_STYLE);
-        string.append(applyPadding("" + index));
+        string.append(applyPadding("" + row));
         string.append(EscapeSequences.RESET_COLOR);
 
         var bg1 = start_bg_1;
-        for (var s : row){
+        for (var col = 1; col <= 8; col++){
+            var piece = board.getPiece(new ChessPosition(row, col));
             string.append(bg1 ? CELL_BG_1 : CELL_BG_2);
-            string.append(bg1 ? WHITE_PIECE_COLOR : BLACK_PIECE_COLOR);
-            string.append(applyPadding(s));
+            if (piece != null) {
+                string.append(
+                        piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_PIECE_COLOR : BLACK_PIECE_COLOR);
+                string.append(applyPadding(piece.toString().toUpperCase()));
+            } else {
+                string.append(applyPadding(" "));
+            }
             bg1 = !bg1;
         }
 
         string.append(COORD_STYLE);
-        string.append(applyPadding("" + index));
+        string.append(applyPadding("" + row));
         string.append(EscapeSequences.RESET_COLOR);
 
         string.append(EscapeSequences.RESET_COLOR);
