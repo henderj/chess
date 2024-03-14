@@ -34,17 +34,18 @@ public class ChessBoardUI {
         displayString.append(buildLetterCoordString(true));
         displayString.append('\n');
         var start_bg_1 = true;
-        for (var row : chessBoard) {
-            displayString.append(buildRow(row, start_bg_1));
+        for (int i = 0; i < chessBoard.length; i++) {
+            String[] row = chessBoard[i];
+            displayString.append(buildRow(row, chessBoard.length - i, start_bg_1));
             displayString.append('\n');
             start_bg_1 = !start_bg_1;
         }
-        displayString.append(buildLetterCoordString(false));
+        displayString.append(buildLetterCoordString(true));
         return displayString.toString();
     }
 
     private String buildLetterCoordString(boolean forwards) {
-        Character[] letters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+        Character[] letters = {' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', ' '};
         if (!forwards) {
             reverse(letters);
         }
@@ -58,9 +59,13 @@ public class ChessBoardUI {
         return string.toString();
     }
 
-    private String buildRow(String[] row, boolean start_bg_1) {
+    private String buildRow(String[] row, int index, boolean start_bg_1) {
         StringBuilder string = new StringBuilder();
-        string.append(WHITE_PIECE_COLOR);
+
+        string.append(COORD_STYLE);
+        string.append(applyPadding("" + index));
+        string.append(EscapeSequences.RESET_COLOR);
+
         var bg1 = start_bg_1;
         for (var s : row){
             string.append(bg1 ? CELL_BG_1 : CELL_BG_2);
@@ -68,6 +73,11 @@ public class ChessBoardUI {
             string.append(applyPadding(s));
             bg1 = !bg1;
         }
+
+        string.append(COORD_STYLE);
+        string.append(applyPadding("" + index));
+        string.append(EscapeSequences.RESET_COLOR);
+
         string.append(EscapeSequences.RESET_COLOR);
         return string.toString();
     }
