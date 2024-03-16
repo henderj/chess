@@ -60,20 +60,17 @@ public class MenuUI {
             var input = in.nextInt();
             switch (input) {
                 case 1 -> {
-                    doRegisterUser();
-                    return NextState.PostLogin;
+                    return doRegisterUser();
                 }
                 case 2 -> {
-                    doLoginUser();
-                    return NextState.PostLogin;
+                    return doLoginUser();
                 }
                 case 3 -> {
                     return NextState.Quit;
                 }
                 case 4 -> {
-                    out.println(
-                            "Enter 1 to register a new user. Enter 2 to login with an existing user. Enter 3 to quit " +
-                                    "the program. Enter 4 to display this message.");
+                    out.println("Enter 1 to register a new user. Enter 2 to login with an existing user.");
+                    out.println("Enter 3 to quit the program. Enter 4 to display this message.");
                     return NextState.PreLogin;
                 }
                 default -> {
@@ -87,16 +84,93 @@ public class MenuUI {
         }
     }
 
-    private void doRegisterUser() {
+    private NextState doRegisterUser() {
         out.println("TODO: register user");
+        return NextState.PostLogin;
     }
 
-    private void doLoginUser() {
+    private NextState doLoginUser() {
         out.println("TODO: login user");
+        return NextState.PostLogin;
     }
 
     private NextState displayPostLoginUI() {
-        out.println("TODO: post login ui");
-        return NextState.PreLogin;
+        out.println();
+        out.println("What would you like to do? (enter a number 1-7)");
+        out.println();
+        out.println("1. Create game");
+        out.println("2. List games");
+        out.println("3. Join game");
+        out.println("4. Observe game");
+        out.println("5. Logout");
+        out.println("6. Quit");
+        out.println("7. Help");
+        out.print("> ");
+
+        try {
+            var input = in.nextInt();
+            switch (input) {
+                case 1 -> {
+                    doCreateGame();
+                    return NextState.PostLogin;
+                }
+                case 2 -> {
+                    doListGames();
+                    return NextState.PostLogin;
+                }
+                case 3 -> {
+                    doJoinGame();
+                    return NextState.PostLogin;
+                }
+                case 4 -> {
+                    doObserveGame();
+                    return NextState.PostLogin;
+                }
+                case 5 -> {
+                    doLogout();
+                    return NextState.PreLogin;
+                }
+                case 6 -> {
+                    return NextState.Quit;
+                }
+                case 7 -> {
+                    out.println(
+                            "Enter 1 to create a new game (does not join the game). Enter 2 to list all existing " +
+                                    "games.");
+                    out.println(
+                            "Enter 3 to join an existing game. Enter 4 to observe an existing game. Enter 5 to logout" +
+                                    ".");
+                    out.println("Enter 6 to quit. Enter 7 to display this message.");
+                    return NextState.PostLogin;
+                }
+                default -> {
+                    out.println("Please enter a number from 1-7.");
+                    return NextState.PostLogin;
+                }
+            }
+        } catch (InputMismatchException ex) {
+            out.println("Please enter a number from 1-7.");
+            return NextState.PostLogin;
+        }
+    }
+
+    private void doCreateGame() {
+        out.println("TODO: Create game.");
+    }
+
+    private void doListGames() {
+        out.println("TODO: List games.");
+    }
+
+    private void doJoinGame() {
+        out.println("TODO: Join game.");
+    }
+
+    private void doObserveGame() {
+        out.println("TODO: Observe game.");
+    }
+
+    private void doLogout() {
+        out.println("TODO: logout.");
     }
 }
