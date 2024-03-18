@@ -1,6 +1,9 @@
 package ui;
 
+import request.LoginRequest;
 import request.RegisterRequest;
+import response.RegisterResponse;
+import serverFacade.ServerFacade;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -17,6 +20,9 @@ public class MenuUI {
 
     private PrintStream out;
     private Scanner in;
+    private final ServerFacade facade = new ServerFacade();
+    private String username;
+    private String authToken;
 
     public static void main(String[] args) {
         var menu = new MenuUI();
@@ -94,19 +100,39 @@ public class MenuUI {
         String password = in.next();
         out.print("Enter email: ");
         String email = in.next();
+        out.println("Registering user...");
+
         RegisterRequest request = new RegisterRequest(username, password, email);
+        RegisterResponse response = facade.register(request);
         out.println("DEBUG: request: " + request);
+        out.println("DEBUG: response: " + response);
+        this.username = response.username();
+        authToken = response.authToken();
+        out.println("User registered!");
+
         return NextState.PostLogin;
     }
 
     private NextState doLoginUser() {
-        out.println("TODO: login user");
+        out.println("Login");
+        out.print("Enter username: ");
+        String username = in.next();
+        out.print("Enter password: ");
+        String password = in.next();
+        out.println("Logging in...");
+
+        var request = new LoginRequest(username, password);
+        var response = facade.login(request);
+        this.username = response.username();
+        authToken = response.authToken();
+        out.println("User logged in!");
+
         return NextState.PostLogin;
     }
 
     private NextState displayPostLoginUI() {
         out.println();
-        out.println("What would you like to do? (enter a number 1-7)");
+        out.println("[" + username + "] What would you like to do? (enter a number 1-7)");
         out.println();
         out.println("1. Create game");
         out.println("2. List games");
