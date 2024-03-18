@@ -4,7 +4,7 @@ import dataAccess.DataAccessException;
 import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryGameDAO;
 import dataAccess.MemoryUserDAO;
-import exception.ServiceException;
+import exception.ResponseException;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,7 @@ import service.ClearService;
 
 public class ClearServiceTests {
     @Test
-    public void canClear() throws DataAccessException, ServiceException {
+    public void canClear() throws DataAccessException, ResponseException {
         var authDAO = new MemoryAuthDAO();
         var userDAO = new MemoryUserDAO();
         var gameDAO = new MemoryGameDAO();

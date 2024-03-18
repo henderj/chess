@@ -4,11 +4,11 @@ import dataAccess.*;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import request.LoginRequest;
-import request.LogoutRequest;
-import request.RegisterRequest;
+import schema.request.LoginRequest;
+import schema.request.LogoutRequest;
+import schema.request.RegisterRequest;
 import exception.NotAuthorizedException;
-import exception.ServiceException;
+import exception.ResponseException;
 import service.UserService;
 
 public class UserServiceTests {
@@ -30,11 +30,11 @@ public class UserServiceTests {
         var userService = getUserService();
         var request = new RegisterRequest("name", "password", "email@email.com");
         Assertions.assertDoesNotThrow(() -> userService.register(request));
-        Assertions.assertThrows(ServiceException.class, () -> userService.register(request));
+        Assertions.assertThrows(ResponseException.class, () -> userService.register(request));
     }
 
     @Test
-    public void canLoginExistingUser() throws ServiceException, DataAccessException {
+    public void canLoginExistingUser() throws ResponseException, DataAccessException {
         var userService = getUserService();
         var username = "name";
         var password = "password";
@@ -45,7 +45,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void cannotLoginWithBadPassword() throws ServiceException, DataAccessException {
+    public void cannotLoginWithBadPassword() throws ResponseException, DataAccessException {
         var userService = getUserService();
         var username = "name";
         var password = "password";
@@ -57,7 +57,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void canLogoutUser() throws ServiceException, DataAccessException {
+    public void canLogoutUser() throws ResponseException, DataAccessException {
         var userService = getUserService();
         var user = new UserData("name", "pass", "email@emal.com");
 

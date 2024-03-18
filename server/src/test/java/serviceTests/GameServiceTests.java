@@ -2,16 +2,16 @@ package serviceTests;
 
 import dataAccess.*;
 import exception.NotAuthorizedException;
-import exception.ServiceException;
+import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import request.CreateGameRequest;
-import request.JoinGameRequest;
-import request.ListGamesRequest;
+import schema.request.CreateGameRequest;
+import schema.request.JoinGameRequest;
+import schema.request.ListGamesRequest;
 import service.GameService;
 
 public class GameServiceTests {
@@ -55,7 +55,7 @@ public class GameServiceTests {
     @Test
     public void cannotJoinGameBadGameID() throws DataAccessException {
         AuthData auth = authDAO.createAuth(new UserData("name", "pass", "email"));
-        Assertions.assertThrows(ServiceException.class,
+        Assertions.assertThrows(ResponseException.class,
                                 () -> gameService.joinGame(new JoinGameRequest(auth.authToken(), "WHITE", 12)));
     }
 

@@ -1,4 +1,4 @@
-package request;
+package schema.request;
 
 public record RegisterRequest(String username, String password, String email) {
 }

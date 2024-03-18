@@ -6,15 +6,15 @@ import dataAccess.GameDAO;
 import exception.AlreadyTakenException;
 import exception.BadRequestException;
 import exception.NotAuthorizedException;
-import exception.ServiceException;
+import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
-import request.CreateGameRequest;
-import request.JoinGameRequest;
-import request.ListGamesRequest;
-import response.CreateGameResponse;
-import response.JoinGameResponse;
-import response.ListGamesResponse;
+import schema.request.CreateGameRequest;
+import schema.request.JoinGameRequest;
+import schema.request.ListGamesRequest;
+import schema.response.CreateGameResponse;
+import schema.response.JoinGameResponse;
+import schema.response.ListGamesResponse;
 
 import java.util.Collection;
 
@@ -27,7 +27,7 @@ public class GameService {
         this.gameDAO = gameDAO;
     }
 
-    public CreateGameResponse createGame(CreateGameRequest request) throws ServiceException {
+    public CreateGameResponse createGame(CreateGameRequest request) throws ResponseException {
         authenticate(request.authToken());
 
         if (request.gameName() == null) {
@@ -38,11 +38,11 @@ public class GameService {
             GameData gameData = gameDAO.createGame(request.gameName());
             return new CreateGameResponse(gameData.gameID());
         } catch (DataAccessException e) {
-            throw new ServiceException(500, "Internal error: Game");
+            throw new ResponseException(500, "Internal error: Game");
         }
     }
 
-    public JoinGameResponse joinGame(JoinGameRequest request) throws ServiceException {
+    public JoinGameResponse joinGame(JoinGameRequest request) throws ResponseException {
         var authData = authenticate(request.authToken());
 
         if (request.gameID() == 0) {
@@ -77,22 +77,22 @@ public class GameService {
             gameDAO.updateGame(game);
             return new JoinGameResponse();
         } catch (DataAccessException e) {
-            throw new ServiceException(500, "Internal error: game");
+            throw new ResponseException(500, "Internal error: game");
         }
     }
 
-    public ListGamesResponse listGames(ListGamesRequest request) throws ServiceException {
+    public ListGamesResponse listGames(ListGamesRequest request) throws ResponseException {
         authenticate(request.authToken());
 
         try {
             Collection<GameData> gameDataCollection = gameDAO.listGames();
             return new ListGamesResponse(gameDataCollection.toArray(new GameData[0]));
         } catch (DataAccessException e) {
-            throw new ServiceException(500, "Error reading games: " + e.getMessage());
+            throw new ResponseException(500, "Error reading games: " + e.getMessage());
         }
     }
 
-    private AuthData authenticate(String authToken) throws ServiceException {
+    private AuthData authenticate(String authToken) throws ResponseException {
         if (authToken == null) {
             throw new NotAuthorizedException();
         }
@@ -103,7 +103,7 @@ public class GameService {
             }
             return authData;
         } catch (DataAccessException e) {
-            throw new ServiceException(500, "Internal error: Auth");
+            throw new ResponseException(500, "Internal error: Auth");
         }
     }
 

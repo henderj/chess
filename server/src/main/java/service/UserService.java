@@ -6,12 +6,12 @@ import dataAccess.UserDAO;
 import exception.*;
 import model.UserData;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import request.LoginRequest;
-import request.LogoutRequest;
-import request.RegisterRequest;
-import response.LoginResponse;
-import response.LogoutResponse;
-import response.RegisterResponse;
+import schema.request.LoginRequest;
+import schema.request.LogoutRequest;
+import schema.request.RegisterRequest;
+import schema.response.LoginResponse;
+import schema.response.LogoutResponse;
+import schema.response.RegisterResponse;
 
 public class UserService {
 
@@ -23,7 +23,7 @@ public class UserService {
         this.authDAO = authDAO;
     }
 
-    public RegisterResponse register(RegisterRequest request) throws ServiceException {
+    public RegisterResponse register(RegisterRequest request) throws ResponseException {
         if (request.username() == null || request.password() == null || request.email() == null) {
             throw new BadRequestException();
         }
@@ -32,25 +32,25 @@ public class UserService {
                 throw new AlreadyTakenException("Username " + request.username() + " already taken.");
             }
         } catch (DataAccessException e) {
-            throw new ServiceException(500, "Internal error: User");
+            throw new ResponseException(500, "Internal error: User");
         }
 
         UserData user = new UserData(request.username(), encryptPassword(request.password()), request.email());
         try {
             userDAO.insertUser(user);
         } catch (DataAccessException e) {
-            throw new ServiceException(500, "Internal error: User");
+            throw new ResponseException(500, "Internal error: User");
         }
 
         try {
             var auth = authDAO.createAuth(user);
             return new RegisterResponse(user.username(), auth.authToken());
         } catch (DataAccessException e) {
-            throw new ServiceException(500, "Internal error: Auth");
+            throw new ResponseException(500, "Internal error: Auth");
         }
     }
 
-    public LoginResponse login(LoginRequest request) throws ServiceException {
+    public LoginResponse login(LoginRequest request) throws ResponseException {
         if (request.username() == null || request.password() == null) {
             throw new BadRequestException();
         }
@@ -67,11 +67,11 @@ public class UserService {
             var auth = authDAO.createAuth(user);
             return new LoginResponse(user.username(), auth.authToken());
         } catch (DataAccessException e) {
-            throw new ServiceException(500, "Internal error: Auth");
+            throw new ResponseException(500, "Internal error: Auth");
         }
     }
 
-    public LogoutResponse logout(LogoutRequest request) throws ServiceException {
+    public LogoutResponse logout(LogoutRequest request) throws ResponseException {
         if (request.authToken() == null) {
             throw new BadRequestException();
         }
@@ -82,7 +82,7 @@ public class UserService {
 
             authDAO.deleteAuth(request.authToken());
         } catch (DataAccessException e) {
-            throw new ServiceException(500, "Internal error: Auth");
+            throw new ResponseException(500, "Internal error: Auth");
         }
         return new LogoutResponse();
     }

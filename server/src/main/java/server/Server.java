@@ -2,10 +2,10 @@ package server;
 
 import com.google.gson.Gson;
 import dataAccess.*;
-import request.*;
-import response.ErrorResponse;
+import schema.request.*;
+import schema.response.ErrorResponse;
 import service.ClearService;
-import exception.ServiceException;
+import exception.ResponseException;
 import service.GameService;
 import service.UserService;
 import spark.*;
@@ -44,26 +44,26 @@ public class Server {
         Spark.put("/game", this::handleJoinGame);
         Spark.get("/game", this::handleListGame);
 
-        Spark.exception(ServiceException.class, this::handleException);
+        Spark.exception(ResponseException.class, this::handleException);
 
         Spark.awaitInitialization();
         return Spark.port();
     }
 
-    private void handleException(ServiceException exception, Request req, Response res) {
+    private void handleException(ResponseException exception, Request req, Response res) {
         res.status(exception.getStatusCode());
         var errorBody = new ErrorResponse("Error: " + exception.getMessage());
         res.body(new Gson().toJson(errorBody));
     }
 
-    private Object handleClear(Request req, Response res) throws ServiceException {
+    private Object handleClear(Request req, Response res) throws ResponseException {
         res.type(RESPONSE_TYPE);
         clearService.clear();
         res.status(200);
         return "{}";
     }
 
-    private Object handleRegister(Request req, Response res) throws ServiceException {
+    private Object handleRegister(Request req, Response res) throws ResponseException {
         res.type(RESPONSE_TYPE);
         var registerRequest = new Gson().fromJson(req.body(), RegisterRequest.class);
         var registerResponse = userService.register(registerRequest);
@@ -71,7 +71,7 @@ public class Server {
         return new Gson().toJson(registerResponse);
     }
 
-    private Object handleLogin(Request req, Response res) throws ServiceException {
+    private Object handleLogin(Request req, Response res) throws ResponseException {
         res.type(RESPONSE_TYPE);
         var loginRequest = new Gson().fromJson(req.body(), LoginRequest.class);
         var loginResponse = userService.login(loginRequest);
@@ -79,7 +79,7 @@ public class Server {
         return new Gson().toJson(loginResponse);
     }
 
-    private Object handleLogout(Request req, Response res) throws ServiceException {
+    private Object handleLogout(Request req, Response res) throws ResponseException {
         res.type(RESPONSE_TYPE);
         var logoutRequest = new LogoutRequest(req.headers("Authorization"));
         var logoutResponse = userService.logout(logoutRequest);
@@ -87,7 +87,7 @@ public class Server {
         return new Gson().toJson(logoutResponse);
     }
 
-    private Object handleCreateGame(Request req, Response res) throws ServiceException {
+    private Object handleCreateGame(Request req, Response res) throws ResponseException {
         res.type(RESPONSE_TYPE);
         var createGameRequest = new Gson().fromJson(req.body(), CreateGameRequest.class);
         createGameRequest = new CreateGameRequest(req.headers("Authorization"), createGameRequest.gameName());
@@ -96,7 +96,7 @@ public class Server {
         return new Gson().toJson(createGameResponse);
     }
 
-    private Object handleJoinGame(Request req, Response res) throws ServiceException {
+    private Object handleJoinGame(Request req, Response res) throws ResponseException {
         res.type(RESPONSE_TYPE);
         var joinGameRequest = new Gson().fromJson(req.body(), JoinGameRequest.class);
         joinGameRequest = new JoinGameRequest(req.headers("Authorization"), joinGameRequest.playerColor(),
@@ -106,7 +106,7 @@ public class Server {
         return new Gson().toJson(joinGameResponse);
     }
 
-    private Object handleListGame(Request req, Response res) throws ServiceException {
+    private Object handleListGame(Request req, Response res) throws ResponseException {
         res.type(RESPONSE_TYPE);
         var listGameRequest = new ListGamesRequest(req.headers("Authorization"));
         var listGameResponse = gameService.listGames(listGameRequest);

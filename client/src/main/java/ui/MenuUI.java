@@ -1,8 +1,8 @@
 package ui;
 
-import request.LoginRequest;
-import request.RegisterRequest;
-import response.RegisterResponse;
+import schema.request.LoginRequest;
+import schema.request.RegisterRequest;
+import schema.response.RegisterResponse;
 import serverFacade.ServerFacade;
 
 import java.io.PrintStream;

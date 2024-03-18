@@ -1,4 +1,4 @@
-package response;
+package schema.response;
 
 import model.GameData;
 
