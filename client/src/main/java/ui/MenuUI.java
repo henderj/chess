@@ -1,5 +1,7 @@
 package ui;
 
+import request.RegisterRequest;
+
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.InputMismatchException;
@@ -85,7 +87,15 @@ public class MenuUI {
     }
 
     private NextState doRegisterUser() {
-        out.println("TODO: register user");
+        out.println("Register new user");
+        out.print("Enter username: ");
+        String username = in.next();
+        out.print("Enter password: ");
+        String password = in.next();
+        out.print("Enter email: ");
+        String email = in.next();
+        RegisterRequest request = new RegisterRequest(username, password, email);
+        out.println("DEBUG: request: " + request);
         return NextState.PostLogin;
     }
 
