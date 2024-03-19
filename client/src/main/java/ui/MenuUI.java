@@ -1,6 +1,7 @@
 package ui;
 
 import exception.ResponseException;
+import model.GameData;
 import schema.request.*;
 import schema.response.RegisterResponse;
 import serverFacade.ClientCommunicator;
@@ -8,6 +9,8 @@ import serverFacade.ServerFacade;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -214,6 +217,10 @@ public class MenuUI {
         out.println("Create game.");
         out.print("Enter a name for the new game (no spaces): ");
         var gameName = in.next();
+        if (gameName == null || gameName.isEmpty()) {
+            out.println("Please enter a valid game name");
+            return;
+        }
         CreateGameRequest request = new CreateGameRequest(authToken, gameName);
         out.println("Creating game...");
         try {
@@ -228,7 +235,8 @@ public class MenuUI {
         out.println("List games.");
         try {
             var response = facade.listGames(new ListGamesRequest(authToken));
-            for (var game : response.games()) {
+            var games = Arrays.stream(response.games()).sorted().toArray();
+            for (var game : games) {
                 out.println(game);
             }
         } catch (ResponseException e) {
