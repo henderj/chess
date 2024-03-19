@@ -10,4 +10,11 @@ public record GameData(int gameID, String whiteUsername, String blackUsername, S
     public GameData addBlackUsername(String newBlackUsername) {
         return new GameData(gameID, whiteUsername, newBlackUsername, gameName, game);
     }
+
+    @Override
+    public String toString() {
+        return gameID + ": white = '" + (whiteUsername == null ? "" : whiteUsername) +
+                "', black = '" + (blackUsername == null ? "" : blackUsername) +
+                "', name = '" + gameName + "'";
+    }
 }

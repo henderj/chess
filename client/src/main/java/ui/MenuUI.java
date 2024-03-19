@@ -217,18 +217,22 @@ public class MenuUI {
         CreateGameRequest request = new CreateGameRequest(authToken, gameName);
         out.println("Creating game...");
         try {
-            facade.createGame(request);
-            out.println("Game created!");
+            var response = facade.createGame(request);
+            out.println("Game created! Game ID: " + response.gameID());
         } catch (ResponseException e) {
             out.println("There was an unexpected error. Please try again.");
         }
     }
 
     private void doListGames() {
-        out.println("TODO: List games.");
-        var response = facade.listGames(new ListGamesRequest(authToken));
-        for (var game : response.games()) {
-            out.println(game);
+        out.println("List games.");
+        try {
+            var response = facade.listGames(new ListGamesRequest(authToken));
+            for (var game : response.games()) {
+                out.println(game);
+            }
+        } catch (ResponseException e) {
+            out.println("There was an unexpected error. Please try again.");
         }
     }
 
