@@ -1,9 +1,7 @@
 package ui;
 
 import exception.ResponseException;
-import schema.request.LoginRequest;
-import schema.request.LogoutRequest;
-import schema.request.RegisterRequest;
+import schema.request.*;
 import schema.response.RegisterResponse;
 import serverFacade.ClientCommunicator;
 import serverFacade.ServerFacade;
@@ -213,11 +211,25 @@ public class MenuUI {
     }
 
     private void doCreateGame() {
-        out.println("TODO: Create game.");
+        out.println("Create game.");
+        out.print("Enter a name for the new game (no spaces): ");
+        var gameName = in.next();
+        CreateGameRequest request = new CreateGameRequest(authToken, gameName);
+        out.println("Creating game...");
+        try {
+            facade.createGame(request);
+            out.println("Game created!");
+        } catch (ResponseException e) {
+            out.println("There was an unexpected error. Please try again.");
+        }
     }
 
     private void doListGames() {
         out.println("TODO: List games.");
+        var response = facade.listGames(new ListGamesRequest(authToken));
+        for (var game : response.games()) {
+            out.println(game);
+        }
     }
 
     private void doJoinGame() {

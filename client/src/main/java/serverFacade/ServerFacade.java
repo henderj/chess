@@ -24,9 +24,8 @@ public class ServerFacade {
         return clientCommunicator.makeRequest("DELETE", "/session", null, LogoutResponse.class, request.authToken());
     }
 
-    public CreateGameResponse createGame(CreateGameRequest request) {
-        // TODO
-        return new CreateGameResponse(1234);
+    public CreateGameResponse createGame(CreateGameRequest request) throws ResponseException {
+        return clientCommunicator.makeRequest("POST", "/game", request, CreateGameResponse.class, request.authToken());
     }
 
     public ListGamesResponse listGames(ListGamesRequest request) {
