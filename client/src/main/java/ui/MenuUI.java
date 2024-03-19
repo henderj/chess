@@ -9,10 +9,7 @@ import serverFacade.ServerFacade;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.InputMismatchException;
-import java.util.Scanner;
+import java.util.*;
 
 public class MenuUI {
 
@@ -25,6 +22,7 @@ public class MenuUI {
     private PrintStream out;
     private Scanner in;
     private final ServerFacade facade;
+    private final ChessBoardUI chessBoardUI = new ChessBoardUI();
     private String username;
     private String authToken;
 
@@ -245,7 +243,28 @@ public class MenuUI {
     }
 
     private void doJoinGame() {
-        out.println("TODO: Join game.");
+        out.println("Join game.");
+        out.print("Enter the ID of the game you want to join: ");
+        var gameID = in.nextInt();
+        out.print("Do you want to join as white or black? (w/b): ");
+        var input = in.next();
+        if (!Objects.equals(input, "w") && !Objects.equals(input, "b")) {
+            out.println("Please enter 'w' or 'b'.");
+            return;
+        }
+        var color = input.equals("w") ? "WHITE" : "BLACK";
+        var request = new JoinGameRequest(authToken, color, gameID);
+        try {
+            var response = facade.joinGame(request);
+            out.println("Game joined!");
+            var board = response.gameData().game().getBoard();
+            out.println();
+            out.println(chessBoardUI.buildChessBoardDisplayString(board, true));
+            out.println();
+            out.println(chessBoardUI.buildChessBoardDisplayString(board, false));
+        } catch (ResponseException e) {
+            out.println("An unexpected error occurred. Please try again.");
+        }
     }
 
     private void doObserveGame() {

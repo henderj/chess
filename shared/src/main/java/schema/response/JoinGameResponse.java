@@ -1,4 +1,6 @@
 package schema.response;
 
-public record JoinGameResponse() {
+import model.GameData;
+
+public record JoinGameResponse(GameData gameData) {
 }

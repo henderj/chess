@@ -32,8 +32,7 @@ public class ServerFacade {
         return clientCommunicator.makeRequest("GET", "/game", null, ListGamesResponse.class, request.authToken());
     }
 
-    public JoinGameResponse joinGame(JoinGameRequest request) {
-        // TODO
-        return new JoinGameResponse();
+    public JoinGameResponse joinGame(JoinGameRequest request) throws ResponseException {
+        return clientCommunicator.makeRequest("PUT", "/game", request, JoinGameResponse.class, request.authToken());
     }
 }

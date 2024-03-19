@@ -75,7 +75,7 @@ public class GameService {
             }
 
             gameDAO.updateGame(game);
-            return new JoinGameResponse();
+            return new JoinGameResponse(game);
         } catch (DataAccessException e) {
             throw new ResponseException(500, "Internal error: game");
         }

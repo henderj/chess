@@ -19,6 +19,8 @@ public class ChessGame {
 
     public ChessGame() {
         moveHistory = new ChessMoveHistory();
+        board = new ChessBoard();
+        board.resetBoard();
     }
 
     /**
