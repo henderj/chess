@@ -32,21 +32,21 @@ public class UserService {
                 throw new AlreadyTakenException("Username " + request.username() + " already taken.");
             }
         } catch (DataAccessException e) {
-            throw new ResponseException(500, "Internal error: User");
+            throw new ResponseException(500, "Internal error: " + e.getMessage());
         }
 
         UserData user = new UserData(request.username(), encryptPassword(request.password()), request.email());
         try {
             userDAO.insertUser(user);
         } catch (DataAccessException e) {
-            throw new ResponseException(500, "Internal error: User");
+            throw new ResponseException(500, "Internal error: " + e.getMessage());
         }
 
         try {
             var auth = authDAO.createAuth(user);
             return new RegisterResponse(user.username(), auth.authToken());
         } catch (DataAccessException e) {
-            throw new ResponseException(500, "Internal error: Auth");
+            throw new ResponseException(500, "Internal error: " + e.getMessage());
         }
     }
 

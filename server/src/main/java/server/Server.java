@@ -10,7 +10,11 @@ import service.GameService;
 import service.UserService;
 import spark.*;
 
+import java.util.logging.Logger;
+
 public class Server {
+
+    private static Logger logger = Logger.getLogger("Server");
 
     private static final String RESPONSE_TYPE = "application/json";
 
@@ -51,6 +55,8 @@ public class Server {
     }
 
     private void handleException(ResponseException exception, Request req, Response res) {
+        logger.warning("Error while handling request. path: " + req.pathInfo() + "; body: " + req.body() +
+                               "; exception: " + exception.getMessage());
         res.status(exception.getStatusCode());
         var errorBody = new ErrorResponse("Error: " + exception.getMessage());
         res.body(new Gson().toJson(errorBody));
@@ -64,6 +70,7 @@ public class Server {
     }
 
     private Object handleRegister(Request req, Response res) throws ResponseException {
+        logger.fine("Got register request with body: " + req.body());
         res.type(RESPONSE_TYPE);
         var registerRequest = new Gson().fromJson(req.body(), RegisterRequest.class);
         var registerResponse = userService.register(registerRequest);

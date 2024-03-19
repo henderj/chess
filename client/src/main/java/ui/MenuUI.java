@@ -1,8 +1,11 @@
 package ui;
 
+import exception.ResponseException;
 import schema.request.LoginRequest;
+import schema.request.LogoutRequest;
 import schema.request.RegisterRequest;
 import schema.response.RegisterResponse;
+import serverFacade.ClientCommunicator;
 import serverFacade.ServerFacade;
 
 import java.io.PrintStream;
@@ -20,12 +23,16 @@ public class MenuUI {
 
     private PrintStream out;
     private Scanner in;
-    private final ServerFacade facade = new ServerFacade();
+    private final ServerFacade facade;
     private String username;
     private String authToken;
 
+    public MenuUI(ServerFacade serverFacade) {
+        this.facade = serverFacade;
+    }
+
     public static void main(String[] args) {
-        var menu = new MenuUI();
+        var menu = new MenuUI(new ServerFacade(new ClientCommunicator("http://localhost:8080")));
         menu.startMenuLoop();
     }
 
@@ -103,14 +110,21 @@ public class MenuUI {
         out.println("Registering user...");
 
         RegisterRequest request = new RegisterRequest(username, password, email);
-        RegisterResponse response = facade.register(request);
-        out.println("DEBUG: request: " + request);
-        out.println("DEBUG: response: " + response);
-        this.username = response.username();
-        authToken = response.authToken();
-        out.println("User registered!");
+        try {
+            RegisterResponse response = facade.register(request);
+            this.username = response.username();
+            authToken = response.authToken();
+            out.println("User registered!");
 
-        return NextState.PostLogin;
+            return NextState.PostLogin;
+        } catch (ResponseException exception) {
+            switch (exception.getStatusCode()) {
+                case 400 -> out.println("Please enter a valid username, password, and email.");
+                case 403 -> out.println("Username already taken.");
+                default -> out.println("There was an unexpected error. Please try again.");
+            }
+            return NextState.PreLogin;
+        }
     }
 
     private NextState doLoginUser() {
@@ -122,12 +136,21 @@ public class MenuUI {
         out.println("Logging in...");
 
         var request = new LoginRequest(username, password);
-        var response = facade.login(request);
-        this.username = response.username();
-        authToken = response.authToken();
-        out.println("User logged in!");
+        try {
+            var response = facade.login(request);
+            this.username = response.username();
+            authToken = response.authToken();
+            out.println("User logged in!");
 
-        return NextState.PostLogin;
+            return NextState.PostLogin;
+        } catch (ResponseException e) {
+            switch (e.getStatusCode()) {
+                case 400 -> out.println("Please enter a valid username and password.");
+                case 401 -> out.println("Incorrect username or password");
+                default -> out.println("An unexpected error occurred. Please try again.");
+            }
+            return NextState.PreLogin;
+        }
     }
 
     private NextState displayPostLoginUI() {
@@ -163,8 +186,7 @@ public class MenuUI {
                     return NextState.PostLogin;
                 }
                 case 5 -> {
-                    doLogout();
-                    return NextState.PreLogin;
+                    return doLogout();
                 }
                 case 6 -> {
                     return NextState.Quit;
@@ -206,7 +228,15 @@ public class MenuUI {
         out.println("TODO: Observe game.");
     }
 
-    private void doLogout() {
-        out.println("TODO: logout.");
+    private NextState doLogout() {
+        out.println("Logging out...");
+        try {
+            facade.logout(new LogoutRequest(authToken));
+            out.println("Logged out!");
+            return NextState.PreLogin;
+        } catch (ResponseException e) {
+            out.println("An unknown error occurred. Please try again.");
+            return NextState.PostLogin;
+        }
     }
 }

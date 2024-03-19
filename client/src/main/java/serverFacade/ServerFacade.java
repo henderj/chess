@@ -16,14 +16,12 @@ public class ServerFacade {
         return clientCommunicator.makeRequest("POST", "/user", request, RegisterResponse.class);
     }
 
-    public LoginResponse login(LoginRequest request) {
-        // TODO
-        return new LoginResponse("TODO", "TODO");
+    public LoginResponse login(LoginRequest request) throws ResponseException {
+        return clientCommunicator.makeRequest("POST", "/session", request, LoginResponse.class);
     }
 
-    public LogoutResponse logout(LogoutRequest request) {
-        // TODO
-        return new LogoutResponse();
+    public LogoutResponse logout(LogoutRequest request) throws ResponseException {
+        return clientCommunicator.makeRequest("DELETE", "/session", null, LogoutResponse.class, request.authToken());
     }
 
     public CreateGameResponse createGame(CreateGameRequest request) {
