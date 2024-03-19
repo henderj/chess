@@ -1,14 +1,19 @@
 package serverFacade;
 
-
+import exception.ResponseException;
 import model.GameData;
 import schema.request.*;
 import schema.response.*;
 
 public class ServerFacade {
-    public RegisterResponse register(RegisterRequest request) {
-        // TODO
-        return new RegisterResponse("TODO", "TODO");
+    private final ClientCommunicator clientCommunicator;
+
+    public ServerFacade(ClientCommunicator clientCommunicator) {
+        this.clientCommunicator = clientCommunicator;
+    }
+
+    public RegisterResponse register(RegisterRequest request) throws ResponseException {
+        return clientCommunicator.makeRequest("POST", "/user", request, RegisterResponse.class);
     }
 
     public LoginResponse login(LoginRequest request) {
