@@ -34,4 +34,8 @@ public class ServerFacade {
     public JoinGameResponse joinGame(JoinGameRequest request) throws ResponseException {
         return clientCommunicator.makeRequest("PUT", "/game", request, JoinGameResponse.class, request.authToken());
     }
+
+    public void clear() throws ResponseException {
+        clientCommunicator.makeRequest("DELETE", "/db", null, null, null);
+    }
 }
