@@ -38,7 +38,7 @@ public class GameService {
             GameData gameData = gameDAO.createGame(request.gameName());
             return new CreateGameResponse(gameData.gameID());
         } catch (DataAccessException e) {
-            throw new ResponseException(500, "Internal error: Game");
+            throw new ResponseException(500, "Internal error: " + e.getMessage());
         }
     }
 

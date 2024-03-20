@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 public class Server {
 
-    private static Logger logger = Logger.getLogger("Server");
+    private static final Logger logger = Logger.getLogger("Server");
 
     private static final String RESPONSE_TYPE = "application/json";
 

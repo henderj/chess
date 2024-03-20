@@ -8,8 +8,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.logging.Logger;
 
 public class SQLGameDAO implements GameDAO {
+
+    private static final Logger logger = Logger.getLogger("SQLGameDAO");
 
     private final DatabaseManager databaseManager;
 
@@ -33,7 +36,9 @@ public class SQLGameDAO implements GameDAO {
             try (var preparedStatement = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
                 preparedStatement.setString(1, gameName);
                 var chessGame = new ChessGame();
-                preparedStatement.setString(2, serializeGame(chessGame));
+                var jsonString = serializeGame(chessGame);
+                logger.fine("Serialized game: " + jsonString);
+                preparedStatement.setString(2, jsonString);
                 preparedStatement.executeUpdate();
 
                 var resultSet = preparedStatement.getGeneratedKeys();

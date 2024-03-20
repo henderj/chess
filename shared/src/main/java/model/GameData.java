@@ -13,7 +13,7 @@ public record GameData(int gameID, String whiteUsername, String blackUsername, S
 
     @Override
     public String toString() {
-        return gameID + ": name = '" + gameName + "', white = '" + (whiteUsername == null ? "" : whiteUsername) +
+        return "name = '" + gameName + "', white = '" + (whiteUsername == null ? "" : whiteUsername) +
                 "', black = '" + (blackUsername == null ? "" : blackUsername) + "'";
     }
 

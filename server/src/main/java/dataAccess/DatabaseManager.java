@@ -68,7 +68,7 @@ public class DatabaseManager {
                         whiteUsername VARCHAR(255),
                         blackUsername VARCHAR(255),
                         gameName VARCHAR(255) NOT NULL,
-                        gameState VARCHAR(1024),
+                        gameState VARCHAR(2048),
                         PRIMARY KEY (id)
                     );
                     """};

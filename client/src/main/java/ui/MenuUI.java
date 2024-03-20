@@ -13,6 +13,8 @@ import java.util.*;
 
 public class MenuUI {
 
+    public static final String ERROR_TRY_AGAIN = "An unexpected error occurred. Please try again.";
+
     enum NextState {
         PreLogin,
         PostLogin,
@@ -25,6 +27,7 @@ public class MenuUI {
     private final ChessBoardUI chessBoardUI = new ChessBoardUI();
     private String username;
     private String authToken;
+    private List<GameData> games;
 
     public MenuUI(ServerFacade serverFacade) {
         this.facade = serverFacade;
@@ -120,7 +123,7 @@ public class MenuUI {
             switch (exception.getStatusCode()) {
                 case 400 -> out.println("Please enter a valid username, password, and email.");
                 case 403 -> out.println("Username already taken.");
-                default -> out.println("There was an unexpected error. Please try again.");
+                default -> out.println(ERROR_TRY_AGAIN);
             }
             return NextState.PreLogin;
         }
@@ -146,7 +149,7 @@ public class MenuUI {
             switch (e.getStatusCode()) {
                 case 400 -> out.println("Please enter a valid username and password.");
                 case 401 -> out.println("Incorrect username or password");
-                default -> out.println("An unexpected error occurred. Please try again.");
+                default -> out.println(ERROR_TRY_AGAIN);
             }
             return NextState.PreLogin;
         }
@@ -223,9 +226,9 @@ public class MenuUI {
         out.println("Creating game...");
         try {
             var response = facade.createGame(request);
-            out.println("Game created! Game ID: " + response.gameID());
+            out.println("Game created!");
         } catch (ResponseException e) {
-            out.println("There was an unexpected error. Please try again.");
+            out.println(ERROR_TRY_AGAIN);
         }
     }
 
@@ -233,19 +236,22 @@ public class MenuUI {
         out.println("List games.");
         try {
             var response = facade.listGames(new ListGamesRequest(authToken));
-            var games = Arrays.stream(response.games()).sorted().toArray();
-            for (var game : games) {
-                out.println(game);
+            games = Arrays.stream(response.games()).toList();
+            for (int i = 0; i < games.size(); i++) {
+                var game = games.get(i);
+                out.println((i + 1) + ": " + game);
             }
         } catch (ResponseException e) {
-            out.println("There was an unexpected error. Please try again.");
+            out.println(ERROR_TRY_AGAIN);
         }
     }
 
     private void doJoinGame() {
         out.println("Join game.");
-        out.print("Enter the ID of the game you want to join: ");
-        var gameID = in.nextInt();
+
+        var gameId = getGameId();
+        if (gameId == null) return;
+
         out.print("Do you want to join as white or black? (w/b): ");
         var input = in.next();
         if (!Objects.equals(input, "w") && !Objects.equals(input, "b")) {
@@ -253,22 +259,57 @@ public class MenuUI {
             return;
         }
         var color = input.equals("w") ? "WHITE" : "BLACK";
-        var request = new JoinGameRequest(authToken, color, gameID);
+
+        var request = new JoinGameRequest(authToken, color, gameId);
         try {
             var response = facade.joinGame(request);
-            out.println("Game joined!");
+            out.println("Joined game '" + response.gameData().gameName() + "'");
             var board = response.gameData().game().getBoard();
             out.println();
             out.println(chessBoardUI.buildChessBoardDisplayString(board, true));
             out.println();
             out.println(chessBoardUI.buildChessBoardDisplayString(board, false));
         } catch (ResponseException e) {
-            out.println("An unexpected error occurred. Please try again.");
+            switch (e.getStatusCode()) {
+                case 400 -> out.println("That game does not exist.");
+                case 403 -> out.println("Cannot join game as " + color + ". Already taken.");
+                default -> out.println(ERROR_TRY_AGAIN);
+            }
         }
     }
 
+    private Integer getGameId() {
+        out.print("Enter the number of the game you want to join: ");
+        var gameNum = in.nextInt();
+        if (gameNum < 1 || gameNum > games.size()) {
+            out.println("Please enter a valid game number. Use 'List games' to see valid game numbers.");
+            return null;
+        }
+        return games.get(gameNum - 1).gameID();
+    }
+
     private void doObserveGame() {
-        out.println("TODO: Observe game.");
+        out.println("Observe game.");
+
+        var gameId = getGameId();
+        if (gameId == null) return;
+
+        var request = new JoinGameRequest(authToken, null, gameId);
+        try {
+            var response = facade.joinGame(request);
+            out.println("Observing game '" + response.gameData().gameName() + "'");
+            var board = response.gameData().game().getBoard();
+            out.println();
+            out.println(chessBoardUI.buildChessBoardDisplayString(board, true));
+            out.println();
+            out.println(chessBoardUI.buildChessBoardDisplayString(board, false));
+        } catch (ResponseException e) {
+            if (e.getStatusCode() == 400) {
+                out.println("That game does not exists.");
+            } else {
+                out.println(ERROR_TRY_AGAIN);
+            }
+        }
     }
 
     private NextState doLogout() {
@@ -278,7 +319,7 @@ public class MenuUI {
             out.println("Logged out!");
             return NextState.PreLogin;
         } catch (ResponseException e) {
-            out.println("An unknown error occurred. Please try again.");
+            out.println(ERROR_TRY_AGAIN);
             return NextState.PostLogin;
         }
     }
