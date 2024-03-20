@@ -3,7 +3,6 @@ package clientTests;
 import exception.ResponseException;
 import org.junit.jupiter.api.*;
 import schema.request.*;
-import schema.response.RegisterResponse;
 import server.Server;
 import serverFacade.ClientCommunicator;
 import serverFacade.ServerFacade;
@@ -75,7 +74,7 @@ public class ServerFacadeTests {
     public void cannotLogoutWithBadAuth() throws ResponseException {
         RegisterRequest request = new RegisterRequest("user", "pass", "email");
         facade.register(request);
-        var response = facade.login(new LoginRequest(request.username(), request.password()));
+        facade.login(new LoginRequest(request.username(), request.password()));
         Assertions.assertThrows(ResponseException.class, () -> facade.logout(new LogoutRequest("not it")));
     }
 
@@ -91,7 +90,7 @@ public class ServerFacadeTests {
     public void cannotCreateGameWithBadAuth() throws ResponseException {
         RegisterRequest request = new RegisterRequest("user", "pass", "email");
         facade.register(request);
-        var response = facade.login(new LoginRequest(request.username(), request.password()));
+        facade.login(new LoginRequest(request.username(), request.password()));
         Assertions.assertThrows(ResponseException.class,
                                 () -> facade.createGame(new CreateGameRequest("not it", "game")));
     }
@@ -111,7 +110,7 @@ public class ServerFacadeTests {
     public void cannotListGamesWithBadAuth() throws ResponseException {
         RegisterRequest request = new RegisterRequest("user", "pass", "email");
         facade.register(request);
-        var response = facade.login(new LoginRequest(request.username(), request.password()));
+        facade.login(new LoginRequest(request.username(), request.password()));
         Assertions.assertThrows(ResponseException.class, () -> facade.listGames(new ListGamesRequest("not it")));
     }
 

@@ -1,4 +1,3 @@
-import chess.*;
 import serverFacade.ClientCommunicator;
 import serverFacade.ServerFacade;
 import ui.MenuUI;
