@@ -7,7 +7,7 @@ import java.util.HashSet;
 
 public class MemoryUserDAO implements UserDAO{
 
-    private Collection<UserData> userDataCollection;
+    private final Collection<UserData> userDataCollection;
 
     public MemoryUserDAO(){
         this.userDataCollection = new HashSet<>();

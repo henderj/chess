@@ -225,7 +225,7 @@ public class MenuUI {
         CreateGameRequest request = new CreateGameRequest(authToken, gameName);
         out.println("Creating game...");
         try {
-            var response = facade.createGame(request);
+            facade.createGame(request);
             out.println("Game created!");
         } catch (ResponseException e) {
             out.println(ERROR_TRY_AGAIN);
