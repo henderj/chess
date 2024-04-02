@@ -7,8 +7,8 @@ import java.util.Objects;
 public class LoadGame extends ServerMessage {
     private final GameData gameData;
 
-    public LoadGame(ServerMessageType type, GameData gameData) {
-        super(type);
+    public LoadGame(GameData gameData) {
+        super(ServerMessageType.LOAD_GAME);
         this.gameData = gameData;
     }
 
