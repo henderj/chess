@@ -2,6 +2,8 @@ package webSocketMessages.userCommands;
 
 import chess.ChessGame;
 
+import java.util.Objects;
+
 public class JoinPlayer extends UserGameCommand {
     private final int gameID;
     private final ChessGame.TeamColor playerColor;
@@ -18,5 +20,19 @@ public class JoinPlayer extends UserGameCommand {
 
     public ChessGame.TeamColor getPlayerColor() {
         return playerColor;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        JoinPlayer that = (JoinPlayer) o;
+        return gameID == that.gameID && playerColor == that.playerColor;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), gameID, playerColor);
     }
 }
