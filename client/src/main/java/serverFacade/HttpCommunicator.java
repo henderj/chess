@@ -11,10 +11,10 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 
-public class ClientCommunicator {
+public class HttpCommunicator {
     private final String serverUrl;
 
-    public ClientCommunicator(String serverUrl) {
+    public HttpCommunicator(String serverUrl) {
         this.serverUrl = serverUrl;
     }
 

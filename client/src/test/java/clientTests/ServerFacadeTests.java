@@ -4,7 +4,7 @@ import exception.ResponseException;
 import org.junit.jupiter.api.*;
 import schema.request.*;
 import server.Server;
-import serverFacade.ClientCommunicator;
+import serverFacade.HttpCommunicator;
 import serverFacade.ServerFacade;
 
 
@@ -18,7 +18,7 @@ public class ServerFacadeTests {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
-        facade = new ServerFacade(new ClientCommunicator("http://localhost:" + port));
+        facade = new ServerFacade(new HttpCommunicator("http://localhost:" + port));
     }
 
     @AfterAll

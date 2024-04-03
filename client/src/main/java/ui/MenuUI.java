@@ -4,7 +4,7 @@ import exception.ResponseException;
 import model.GameData;
 import schema.request.*;
 import schema.response.RegisterResponse;
-import serverFacade.ClientCommunicator;
+import serverFacade.HttpCommunicator;
 import serverFacade.ServerFacade;
 
 import java.io.PrintStream;
@@ -34,7 +34,7 @@ public class MenuUI {
     }
 
     public static void main(String[] args) {
-        var menu = new MenuUI(new ServerFacade(new ClientCommunicator("http://localhost:8080")));
+        var menu = new MenuUI(new ServerFacade(new HttpCommunicator("http://localhost:8080")));
         menu.startMenuLoop();
     }
 
