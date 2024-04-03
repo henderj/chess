@@ -86,6 +86,15 @@ public class UserService {
         }
         return new LogoutResponse();
     }
+
+    public String readUsername(String authToken) throws ResponseException {
+        try {
+            return authDAO.readAuth(authToken).username();
+        } catch (DataAccessException e) {
+            throw new ResponseException(500, "Internal error: " + e.getMessage());
+        }
+    }
+
     private String encryptPassword(String password) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         return encoder.encode(password);

@@ -9,6 +9,7 @@ import exception.ResponseException;
 import service.GameService;
 import service.UserService;
 import spark.*;
+import websocket.WebSocketHandler;
 
 import java.util.logging.Logger;
 
@@ -38,6 +39,8 @@ public class Server {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/connect", new WebSocketHandler(gameService, userService));
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", this::handleClear);
