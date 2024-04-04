@@ -40,7 +40,7 @@ public class WebSocketHandler {
                     var username = userService.readUsername(authToken);
                     var gameID = joinPlayerCommand.getGameID();
 
-                    var gameSession = gameSessionManager.getGameSession(gameID);
+                    var gameSession = gameSessionManager.getGameSession(gameID, authToken);
                     Connection connection = new Connection(authToken, session);
                     gameSession.addPlayer(connection, joinPlayerCommand.getPlayerColor());
 
@@ -59,7 +59,7 @@ public class WebSocketHandler {
                     var username = userService.readUsername(authToken);
                     var gameID = joinObserverCommand.getGameID();
 
-                    var gameSession = gameSessionManager.getGameSession(gameID);
+                    var gameSession = gameSessionManager.getGameSession(gameID, authToken);
                     Connection connection = new Connection(authToken, session);
                     gameSession.addObserver(connection);
 
@@ -78,7 +78,7 @@ public class WebSocketHandler {
                     var authToken = leaveCommand.getAuthString();
                     var username = userService.readUsername(authToken);
 
-                    var gameSession = gameSessionManager.getGameSession(leaveCommand.getGameID());
+                    var gameSession = gameSessionManager.getGameSession(leaveCommand.getGameID(), authToken);
                     gameSession.removeParticipant(authToken);
 
                     var notification = new Notification(username + " left the game");
@@ -89,7 +89,7 @@ public class WebSocketHandler {
                     var authToken = resignCommand.getAuthString();
                     var username = userService.readUsername(authToken);
 
-                    var gameSession = gameSessionManager.getGameSession(resignCommand.getGameID());
+                    var gameSession = gameSessionManager.getGameSession(resignCommand.getGameID(), authToken);
                     gameSession.removeParticipant(authToken);
                     gameSession.endGame(authToken);
 

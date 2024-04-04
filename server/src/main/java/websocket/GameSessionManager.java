@@ -1,6 +1,8 @@
 package websocket;
 
 import dataAccess.GameDAO;
+import exception.BadRequestException;
+import exception.ResponseException;
 import service.GameService;
 import service.UserService;
 
@@ -16,7 +18,10 @@ public class GameSessionManager {
         this.userService = userService;
     }
 
-    public GameSession getGameSession(int gameID) {
+    public GameSession getGameSession(int gameID, String authToken) throws ResponseException {
+        if (gameService.readGame(gameID, authToken) == null) {
+            throw new BadRequestException("game with id " + gameID + " does not exist");
+        }
         if (gameSessions.containsKey(gameID)) {
             return gameSessions.get(gameID);
         }
