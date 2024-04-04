@@ -295,7 +295,7 @@ public class MenuUI implements ServerMessageObserver {
 
         var request = new JoinGameRequest(authToken, color, gameId);
         try {
-            var response = facade.joinGame(request);
+            facade.joinGame(request);
             perspective = color.equals("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
             isObserver = false;
             return NextState.Game;
@@ -327,7 +327,7 @@ public class MenuUI implements ServerMessageObserver {
 
         var request = new JoinGameRequest(authToken, null, gameId);
         try {
-            var response = facade.joinGame(request);
+            facade.joinGame(request);
             perspective = ChessGame.TeamColor.WHITE;
             isObserver = true;
             return NextState.Game;

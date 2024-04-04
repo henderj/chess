@@ -3,12 +3,10 @@ package serverFacade;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import observer.ServerMessageObserver;
-import schema.request.JoinGameRequest;
 import webSocketMessages.serverMessages.Error;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
-import webSocketMessages.userCommands.JoinPlayer;
 import webSocketMessages.userCommands.UserGameCommand;
 
 import javax.websocket.*;
@@ -21,7 +19,7 @@ public class WebSocketCommunicator extends Endpoint {
     private static final Logger logger = Logger.getLogger("WebSocketCommunicator");
     private final URI socketUri;
     private Session session;
-    private ServerMessageObserver messageObserver;
+    private final ServerMessageObserver messageObserver;
 
     public WebSocketCommunicator(String baseUrl, ServerMessageObserver messageObserver) throws ResponseException {
         try {

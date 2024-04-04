@@ -7,7 +7,6 @@ import schema.response.*;
 import webSocketMessages.userCommands.JoinObserver;
 import webSocketMessages.userCommands.JoinPlayer;
 import webSocketMessages.userCommands.Leave;
-import webSocketMessages.userCommands.UserGameCommand;
 
 public class ServerFacade {
     private final HttpCommunicator httpCommunicator;
