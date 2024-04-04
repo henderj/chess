@@ -12,3 +12,5 @@ out/
 server/src/main/resources/db.properties
 
 .idea/
+
+log**.txt.*
