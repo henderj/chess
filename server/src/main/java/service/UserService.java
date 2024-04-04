@@ -4,6 +4,7 @@ import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
 import exception.*;
+import model.AuthData;
 import model.UserData;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import schema.request.LoginRequest;
@@ -103,6 +104,21 @@ public class UserService {
     private boolean passwordsMatch(String clearTextPassword, String hashedPassword) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         return encoder.matches(clearTextPassword, hashedPassword);
+    }
+
+    public AuthData authenticate(String authToken) throws ResponseException {
+        if (authToken == null) {
+            throw new NotAuthorizedException();
+        }
+        try {
+            AuthData authData = authDAO.readAuth(authToken);
+            if (authData == null) {
+                throw new NotAuthorizedException();
+            }
+            return authData;
+        } catch (DataAccessException e) {
+            throw new ResponseException(500, "Internal error: Auth");
+        }
     }
 
 }

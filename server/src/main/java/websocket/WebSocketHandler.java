@@ -32,6 +32,7 @@ public class WebSocketHandler {
         logger.info("received command from user: " + message);
         UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
         try {
+            userService.authenticate(command.getAuthString());
             switch (command.getCommandType()) {
                 case JOIN_PLAYER -> {
                     var joinPlayerCommand = new Gson().fromJson(message, JoinPlayer.class);

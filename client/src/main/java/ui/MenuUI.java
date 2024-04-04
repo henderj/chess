@@ -77,7 +77,7 @@ public class MenuUI implements ServerMessageObserver {
         switch (message.getServerMessageType()) {
             case LOAD_GAME -> {
                 var loadGameMessage = (LoadGame) message;
-                currentGame = loadGameMessage.getGameData();
+                currentGame = loadGameMessage.getGame();
                 drawCurrentBoard();
             }
             case ERROR -> {

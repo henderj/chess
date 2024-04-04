@@ -19,7 +19,7 @@ public class GameUI implements ServerMessageObserver {
         switch (message.getServerMessageType()) {
             case LOAD_GAME -> {
                 var loadGameMessage = (LoadGame) message;
-                var gameData = loadGameMessage.getGameData();
+                var gameData = loadGameMessage.getGame();
                 var boardString = chessBoardUI.buildChessBoardDisplayString(gameData.game().getBoard(), perspective);
 
             }
