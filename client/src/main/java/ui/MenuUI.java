@@ -13,6 +13,7 @@ import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.Leave;
+import webSocketMessages.userCommands.Resign;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -380,7 +381,7 @@ public class MenuUI implements ServerMessageObserver {
                     throw new RuntimeException("Not implemented");
                 }
                 case 5 -> {
-                    throw new RuntimeException("Not implemented");
+                    return doResignGame();
                 }
                 case 6 -> {
                     throw new RuntimeException("Not implemented");
@@ -392,6 +393,23 @@ public class MenuUI implements ServerMessageObserver {
             }
         } catch (InputMismatchException ex) {
             out.println("Please enter a number from 1-6. Enter 1 for help.");
+            return NextState.Game;
+        }
+    }
+
+    private NextState doResignGame() {
+        if (isObserver) {
+            out.println("You are an observer. You cannot resign the game.");
+            return NextState.Game;
+        }
+        var command = new Resign(authToken, currentGame.gameID());
+        try {
+            facade.resignGame(command);
+            perspective = null;
+            currentGame = null;
+            return NextState.PostLogin;
+        } catch (ResponseException e) {
+            out.println(ERROR_TRY_AGAIN);
             return NextState.Game;
         }
     }

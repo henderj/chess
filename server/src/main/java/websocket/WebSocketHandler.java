@@ -11,10 +11,7 @@ import service.UserService;
 import webSocketMessages.serverMessages.Error;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
-import webSocketMessages.userCommands.JoinObserver;
-import webSocketMessages.userCommands.JoinPlayer;
-import webSocketMessages.userCommands.Leave;
-import webSocketMessages.userCommands.UserGameCommand;
+import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -87,6 +84,16 @@ public class WebSocketHandler {
                     gameSession.broadcast(null, new Gson().toJson(notification));
                 }
                 case RESIGN -> {
+                    var resignCommand = new Gson().fromJson(message, Resign.class);
+                    var authToken = resignCommand.getAuthString();
+                    var username = userService.readUsername(authToken);
+
+                    var gameSession = gameSessionManager.getGameSession(resignCommand.getGameID());
+                    gameSession.removeParticipant(authToken);
+                    gameSession.endGame(authToken);
+
+                    var notification = new Notification(username + " resigned");
+                    gameSession.broadcast(null, new Gson().toJson(notification));
                 }
             }
         } catch (ResponseException | IOException e) {

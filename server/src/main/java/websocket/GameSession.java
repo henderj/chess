@@ -54,6 +54,12 @@ public class GameSession {
         return gameService.readGame(gameID, authToken);
     }
 
+    public void endGame(String authToken) throws ResponseException {
+        var gameData = getGameData(authToken);
+        gameData.game().endGame();
+        gameService.updateGame(gameData, authToken);
+    }
+
     public void addPlayer(Connection connection, ChessGame.TeamColor color) throws ResponseException {
         cleanUpConnections();
 

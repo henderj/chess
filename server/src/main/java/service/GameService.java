@@ -104,6 +104,16 @@ public class GameService {
         }
     }
 
+    public void updateGame(GameData gameData, String authToken) throws ResponseException {
+        authenticate(authToken);
+
+        try {
+            gameDAO.updateGame(gameData);
+        } catch (DataAccessException e) {
+            throw new ResponseException(500, "Internal error: " + e.getMessage());
+        }
+    }
+
     private AuthData authenticate(String authToken) throws ResponseException {
         if (authToken == null) {
             throw new NotAuthorizedException();

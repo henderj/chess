@@ -14,6 +14,7 @@ public class ChessGame {
     private ChessBoard board;
     private TeamColor turn = TeamColor.WHITE;
     private ChessMoveHistory moveHistory;
+    private boolean ended = false;
 
     private ChessPieceMoves.EnPassantChessMove enPassantMove = null;
 
@@ -247,17 +248,26 @@ public class ChessGame {
         return board;
     }
 
+    public void endGame() {
+        ended = true;
+    }
+
+    public boolean isEnded() {
+        return ended;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessGame chessGame = (ChessGame) o;
-        return Objects.equals(board, chessGame.board) && turn == chessGame.turn && Objects.equals(
+        return ended == chessGame.ended && Objects.equals(board,
+                                                          chessGame.board) && turn == chessGame.turn && Objects.equals(
                 moveHistory, chessGame.moveHistory) && Objects.equals(enPassantMove, chessGame.enPassantMove);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(board, turn, moveHistory, enPassantMove);
+        return Objects.hash(board, turn, moveHistory, ended, enPassantMove);
     }
 }
