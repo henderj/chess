@@ -14,7 +14,9 @@ import webSocketMessages.serverMessages.Error;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.userCommands.JoinObserver;
 import webSocketMessages.userCommands.JoinPlayer;
+import webSocketMessages.userCommands.Leave;
 import webSocketMessages.userCommands.UserGameCommand;
 
 import java.io.IOException;
@@ -32,7 +34,7 @@ public class WebSocketHandler {
     }
 
     @OnWebSocketMessage
-    public void onMessage(Session session, String message) {
+    public void onMessage(Session session, String message) throws IOException {
         logger.info("received command from user: " + message);
         UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
         try {
@@ -41,8 +43,9 @@ public class WebSocketHandler {
                     var joinPlayerCommand = new Gson().fromJson(message, JoinPlayer.class);
                     var authToken = joinPlayerCommand.getAuthString();
                     var username = userService.readUsername(authToken);
+                    var gameID = joinPlayerCommand.getGameID();
 
-                    var gameSession = gameSessionManager.getGameSession(joinPlayerCommand.getGameID());
+                    var gameSession = gameSessionManager.getGameSession(gameID);
                     Connection connection = new Connection(authToken, session);
                     gameSession.addPlayer(connection, joinPlayerCommand.getPlayerColor());
 
@@ -56,17 +59,42 @@ public class WebSocketHandler {
                     gameSession.broadcast(authToken, new Gson().toJson(notification));
                 }
                 case JOIN_OBSERVER -> {
+                    var joinObserverCommand = new Gson().fromJson(message, JoinObserver.class);
+                    var authToken = joinObserverCommand.getAuthString();
+                    var username = userService.readUsername(authToken);
+                    var gameID = joinObserverCommand.getGameID();
+
+                    var gameSession = gameSessionManager.getGameSession(gameID);
+                    Connection connection = new Connection(authToken, session);
+                    gameSession.addObserver(connection);
+
+                    LoadGame loadGameMessage = new LoadGame(gameSession.getGameData(authToken));
+                    String loadGameJson = new Gson().toJson(loadGameMessage);
+                    logger.fine("sending load game message to player: " + loadGameJson);
+                    session.getRemote().sendString(loadGameJson);
+
+                    var notification = new Notification(username + " joined as an observer");
+                    gameSession.broadcast(authToken, new Gson().toJson(notification));
                 }
                 case MAKE_MOVE -> {
                 }
                 case LEAVE -> {
+                    var leaveCommand = new Gson().fromJson(message, Leave.class);
+                    var authToken = leaveCommand.getAuthString();
+                    var username = userService.readUsername(authToken);
+
+                    var gameSession = gameSessionManager.getGameSession(leaveCommand.getGameID());
+                    gameSession.removeParticipant(authToken);
+
+                    var notification = new Notification(username + " left the game");
+                    gameSession.broadcast(null, new Gson().toJson(notification));
                 }
                 case RESIGN -> {
                 }
             }
         } catch (ResponseException | IOException e) {
             var errorMessage = new Error(e.getMessage());
-            throw new RuntimeException(e);
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
         }
     }
 }

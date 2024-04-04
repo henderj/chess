@@ -6,6 +6,7 @@ import schema.request.*;
 import schema.response.*;
 import webSocketMessages.userCommands.JoinObserver;
 import webSocketMessages.userCommands.JoinPlayer;
+import webSocketMessages.userCommands.Leave;
 import webSocketMessages.userCommands.UserGameCommand;
 
 public class ServerFacade {
@@ -56,6 +57,10 @@ public class ServerFacade {
 
 
         return response;
+    }
+
+    public void leaveGame(Leave command) throws ResponseException {
+        webSocketCommunicator.sendCommand(command);
     }
 
     public void clear() throws ResponseException {

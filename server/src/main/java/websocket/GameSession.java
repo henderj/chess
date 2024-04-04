@@ -84,11 +84,17 @@ public class GameSession {
         observers.put(connection.authToken(), connection);
     }
 
-    public void removePlayer() {
-    }
-
-    public void removeObserver(String authToken) {
-        observers.remove(authToken);
+    public void removeParticipant(String authToken) {
+        if (whitePlayerConnection != null && whitePlayerConnection.authToken().equals(authToken)) {
+            whitePlayerConnection.session().close();
+            whitePlayerConnection = null;
+        } else if (blackPlayerConnection != null && blackPlayerConnection.authToken().equals(authToken)) {
+            blackPlayerConnection.session().close();
+            blackPlayerConnection = null;
+        } else {
+            var conn = observers.remove(authToken);
+            conn.session().close();
+        }
     }
 
     public void cleanUpConnections() {
