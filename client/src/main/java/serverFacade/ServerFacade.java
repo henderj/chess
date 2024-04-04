@@ -1,14 +1,23 @@
 package serverFacade;
 
+import chess.ChessGame;
 import exception.ResponseException;
 import schema.request.*;
 import schema.response.*;
+import webSocketMessages.userCommands.JoinObserver;
+import webSocketMessages.userCommands.JoinPlayer;
+import webSocketMessages.userCommands.UserGameCommand;
 
 public class ServerFacade {
     private final HttpCommunicator httpCommunicator;
+    private WebSocketCommunicator webSocketCommunicator;
 
     public ServerFacade(HttpCommunicator httpCommunicator) {
         this.httpCommunicator = httpCommunicator;
+    }
+
+    public void setWebSocketCommunicator(WebSocketCommunicator webSocketCommunicator) {
+        this.webSocketCommunicator = webSocketCommunicator;
     }
 
     public RegisterResponse register(RegisterRequest request) throws ResponseException {
@@ -32,7 +41,21 @@ public class ServerFacade {
     }
 
     public JoinGameResponse joinGame(JoinGameRequest request) throws ResponseException {
-        return httpCommunicator.makeRequest("PUT", "/game", request, JoinGameResponse.class, request.authToken());
+        var response = httpCommunicator.makeRequest("PUT", "/game", request, JoinGameResponse.class,
+                                                    request.authToken());
+
+        if (request.playerColor() == null) {
+            var command = new JoinObserver(request.authToken(), request.gameID());
+            webSocketCommunicator.sendCommand(command);
+        } else {
+            var command = new JoinPlayer(request.authToken(), request.gameID(),
+                                         request.playerColor().equals("WHITE") ? ChessGame.TeamColor.WHITE :
+                                                 ChessGame.TeamColor.BLACK);
+            webSocketCommunicator.sendCommand(command);
+        }
+
+
+        return response;
     }
 
     public void clear() throws ResponseException {

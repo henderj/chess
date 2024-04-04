@@ -54,6 +54,7 @@ public class Server {
         Spark.exception(ResponseException.class, this::handleException);
 
         Spark.awaitInitialization();
+        logger.fine("Server started on port " + Spark.port());
         return Spark.port();
     }
 

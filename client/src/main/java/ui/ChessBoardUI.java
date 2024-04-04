@@ -28,14 +28,15 @@ public class ChessBoardUI {
         var board = new ChessBoard();
         board.resetBoard();
         board.addPiece(new ChessPosition(4, 2), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
-        var displayString = ui.buildChessBoardDisplayString(board, true);
+        var displayString = ui.buildChessBoardDisplayString(board, ChessGame.TeamColor.WHITE);
         out.println(displayString);
         out.println();
-        displayString = ui.buildChessBoardDisplayString(board, false);
+        displayString = ui.buildChessBoardDisplayString(board, ChessGame.TeamColor.BLACK);
         out.println(displayString);
     }
 
-    public String buildChessBoardDisplayString(ChessBoard chessBoard, boolean whitePerspective) {
+    public String buildChessBoardDisplayString(ChessBoard chessBoard, ChessGame.TeamColor perspective) {
+        var whitePerspective = perspective == ChessGame.TeamColor.WHITE;
         StringBuilder displayString = new StringBuilder();
         displayString.append(buildLetterCoordString(whitePerspective));
         displayString.append('\n');

@@ -11,8 +11,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 public class GameSession {
+    private static final Logger logger = Logger.getLogger("GameSession");
     private final GameService gameService;
     private final UserService userService;
     private final int gameID;
@@ -30,9 +32,11 @@ public class GameSession {
         cleanUpConnections();
 
         if (whitePlayerConnection != null && !whitePlayerConnection.authToken().equals(excludeAuthToken)) {
+            logger.fine("broadcasting message to white player: " + message);
             whitePlayerConnection.send(message);
         }
         if (blackPlayerConnection != null && !blackPlayerConnection.authToken().equals(excludeAuthToken)) {
+            logger.fine("broadcasting message to black player: " + message);
             blackPlayerConnection.send(message);
         }
 
@@ -40,6 +44,7 @@ public class GameSession {
             String authToken = entry.getKey();
             Connection connection = entry.getValue();
             if (!authToken.equals(excludeAuthToken)) {
+                logger.fine("broadcasting message to observer: " + message);
                 connection.send(message);
             }
         }
@@ -90,10 +95,12 @@ public class GameSession {
         if (whitePlayerConnection != null && !whitePlayerConnection.session().isOpen()) {
             whitePlayerConnection.session().close();
             whitePlayerConnection = null;
+            logger.fine("cleared white player connection");
         }
         if (blackPlayerConnection != null && !blackPlayerConnection.session().isOpen()) {
             blackPlayerConnection.session().close();
             blackPlayerConnection = null;
+            logger.fine("cleared black player connection");
         }
 
         var removeList = new ArrayList<Connection>();
@@ -105,6 +112,7 @@ public class GameSession {
 
         for (var c : removeList) {
             observers.remove(c.authToken());
+            logger.fine("cleared observer connection");
         }
     }
 }

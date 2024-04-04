@@ -18,9 +18,11 @@ import webSocketMessages.userCommands.JoinPlayer;
 import webSocketMessages.userCommands.UserGameCommand;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 @WebSocket
 public class WebSocketHandler {
+    private static final Logger logger = Logger.getLogger("WebSocketHandler");
     private final GameSessionManager gameSessionManager;
     private final UserService userService;
 
@@ -31,11 +33,12 @@ public class WebSocketHandler {
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
+        logger.info("received command from user: " + message);
         UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
         try {
             switch (command.getCommandType()) {
                 case JOIN_PLAYER -> {
-                    var joinPlayerCommand = (JoinPlayer) command;
+                    var joinPlayerCommand = new Gson().fromJson(message, JoinPlayer.class);
                     var authToken = joinPlayerCommand.getAuthString();
                     var username = userService.readUsername(authToken);
 
@@ -44,7 +47,9 @@ public class WebSocketHandler {
                     gameSession.addPlayer(connection, joinPlayerCommand.getPlayerColor());
 
                     LoadGame loadGameMessage = new LoadGame(gameSession.getGameData(authToken));
-                    session.getRemote().sendString(new Gson().toJson(loadGameMessage));
+                    String loadGameJson = new Gson().toJson(loadGameMessage);
+                    logger.fine("sending load game message to player: " + loadGameJson);
+                    session.getRemote().sendString(loadGameJson);
 
                     var notification = new Notification(
                             username + " joined as " + (joinPlayerCommand.getPlayerColor() == ChessGame.TeamColor.WHITE ? "white" : "black"));

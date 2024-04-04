@@ -7,9 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
+import java.net.*;
 
 public class HttpCommunicator {
     private final String serverUrl;
@@ -22,7 +20,8 @@ public class HttpCommunicator {
         return makeRequest(method, path, body, responseClass, null);
     }
 
-    public <T> T makeRequest(String method, String path, Object body, Class<T> responseClass, String authToken) throws ResponseException {
+    public <T> T makeRequest(String method, String path, Object body, Class<T> responseClass,
+                             String authToken) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -37,7 +36,7 @@ public class HttpCommunicator {
             http.connect();
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
-        } catch (Exception ex) {
+        } catch (IOException | URISyntaxException ex) {
             throw new ResponseException(500, ex.getMessage());
         }
     }

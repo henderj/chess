@@ -60,14 +60,16 @@ public class GameService {
                 throw new BadRequestException("Game with id " + request.gameID() + " does not exist");
             }
 
+            var username = authDAO.readAuth(request.authToken()).username();
+
             if (request.playerColor() != null) {
                 if (request.playerColor().equals("WHITE")) {
-                    if (game.whiteUsername() != null) {
+                    if (game.whiteUsername() != null && !game.whiteUsername().equals(username)) {
                         throw new AlreadyTakenException("White user has already joined");
                     }
                     game = game.addWhiteUsername(authData.username());
                 } else {
-                    if (game.blackUsername() != null) {
+                    if (game.blackUsername() != null && !game.blackUsername().equals(username)) {
                         throw new AlreadyTakenException("Black user has already joined");
                     }
                     game = game.addBlackUsername(authData.username());

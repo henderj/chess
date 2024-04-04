@@ -1,36 +1,48 @@
 package ui;
 
+import chess.ChessGame;
 import exception.ResponseException;
 import model.GameData;
+import observer.ServerMessageObserver;
 import schema.request.*;
 import schema.response.RegisterResponse;
 import serverFacade.HttpCommunicator;
 import serverFacade.ServerFacade;
+import webSocketMessages.serverMessages.LoadGame;
+import webSocketMessages.serverMessages.ServerMessage;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.logging.Logger;
 
-public class MenuUI {
+public class MenuUI implements ServerMessageObserver {
+    private static final Logger logger = Logger.getLogger("MenuUI");
 
     public static final String ERROR_TRY_AGAIN = "An unexpected error occurred. Please try again.";
+
 
     enum NextState {
         PreLogin,
         PostLogin,
-        Quit
+        Game, Quit
     }
 
     private PrintStream out;
     private Scanner in;
     private final ServerFacade facade;
-    private final ChessBoardUI chessBoardUI = new ChessBoardUI();
+    private final ChessBoardUI chessBoardUI;
+    private final GameUI gameUI;
+    private ChessGame.TeamColor perspective;
     private String username;
     private String authToken;
     private List<GameData> games;
+    private GameData currentGame;
 
     public MenuUI(ServerFacade serverFacade) {
         this.facade = serverFacade;
+        chessBoardUI = new ChessBoardUI();
+        gameUI = new GameUI(chessBoardUI);
     }
 
     public static void main(String[] args) {
@@ -49,10 +61,29 @@ public class MenuUI {
             switch (nextState) {
                 case PreLogin -> nextState = displayPreLoginUI();
                 case PostLogin -> nextState = displayPostLoginUI();
+                case Game -> nextState = displayGameUI();
             }
         }
 
         displayGoodbye();
+    }
+
+    @Override
+    public void sendMessage(ServerMessage message) {
+        logger.fine("received message from server: " + message);
+        switch (message.getServerMessageType()) {
+            case LOAD_GAME -> {
+                var loadGameMessage = (LoadGame) message;
+                currentGame = loadGameMessage.getGameData();
+                var boardString = chessBoardUI.buildChessBoardDisplayString(currentGame.game().getBoard(), perspective);
+                out.println();
+                out.println(boardString);
+            }
+            case ERROR -> {
+            }
+            case NOTIFICATION -> {
+            }
+        }
     }
 
     private void displayWelcome() {
@@ -180,8 +211,7 @@ public class MenuUI {
                     return NextState.PostLogin;
                 }
                 case 3 -> {
-                    doJoinGame();
-                    return NextState.PostLogin;
+                    return doJoinGame();
                 }
                 case 4 -> {
                     doObserveGame();
@@ -246,29 +276,31 @@ public class MenuUI {
         }
     }
 
-    private void doJoinGame() {
+    private NextState doJoinGame() {
         out.println("Join game.");
 
         var gameId = getGameId();
-        if (gameId == null) return;
+        if (gameId == null) return NextState.PostLogin;
 
         out.print("Do you want to join as white or black? (w/b): ");
         var input = in.next();
         if (!Objects.equals(input, "w") && !Objects.equals(input, "b")) {
             out.println("Please enter 'w' or 'b'.");
-            return;
+            return NextState.PostLogin;
         }
         var color = input.equals("w") ? "WHITE" : "BLACK";
 
         var request = new JoinGameRequest(authToken, color, gameId);
         try {
             var response = facade.joinGame(request);
-            out.println("Joined game '" + response.gameData().gameName() + "'");
-            var board = response.gameData().game().getBoard();
-            out.println();
-            out.println(chessBoardUI.buildChessBoardDisplayString(board, true));
-            out.println();
-            out.println(chessBoardUI.buildChessBoardDisplayString(board, false));
+            perspective = color.equals("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+//            out.println("Joined game '" + response.gameData().gameName() + "'");
+//            var board = response.gameData().game().getBoard();
+//            out.println();
+//            out.println(chessBoardUI.buildChessBoardDisplayString(board, ChessGame.TeamColor.WHITE));
+//            out.println();
+//            out.println(chessBoardUI.buildChessBoardDisplayString(board, ChessGame.TeamColor.BLACK));
+            return NextState.Game;
         } catch (ResponseException e) {
             switch (e.getStatusCode()) {
                 case 400 -> out.println("That game does not exist.");
@@ -276,6 +308,7 @@ public class MenuUI {
                 default -> out.println(ERROR_TRY_AGAIN);
             }
         }
+        return NextState.PostLogin;
     }
 
     private Integer getGameId() {
@@ -300,9 +333,9 @@ public class MenuUI {
             out.println("Observing game '" + response.gameData().gameName() + "'");
             var board = response.gameData().game().getBoard();
             out.println();
-            out.println(chessBoardUI.buildChessBoardDisplayString(board, true));
+            out.println(chessBoardUI.buildChessBoardDisplayString(board, ChessGame.TeamColor.WHITE));
             out.println();
-            out.println(chessBoardUI.buildChessBoardDisplayString(board, false));
+            out.println(chessBoardUI.buildChessBoardDisplayString(board, ChessGame.TeamColor.BLACK));
         } catch (ResponseException e) {
             if (e.getStatusCode() == 400) {
                 out.println("That game does not exists.");
@@ -322,5 +355,15 @@ public class MenuUI {
             out.println(ERROR_TRY_AGAIN);
             return NextState.PostLogin;
         }
+    }
+
+    private NextState displayGameUI() {
+//        out.println("Joined game");
+        if (currentGame != null) {
+            out.println("[" + username + ", " + currentGame.gameName() + "]");
+        }
+        out.print("> ");
+        var input = in.nextInt();
+        return NextState.Game;
     }
 }
