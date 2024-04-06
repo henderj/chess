@@ -14,7 +14,6 @@ public class AuthService {
     }
 
     public AuthData authenticate(String authToken) throws ResponseException {
-        // TODO: refactor
         if (authToken == null) {
             throw new NotAuthorizedException();
         }
