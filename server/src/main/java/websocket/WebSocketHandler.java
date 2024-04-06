@@ -72,6 +72,21 @@ public class WebSocketHandler {
                     gameSession.broadcast(authToken, new Gson().toJson(notification));
                 }
                 case MAKE_MOVE -> {
+                    var makeMoveCommand = new Gson().fromJson(message, MakeMove.class);
+                    var authToken = makeMoveCommand.getAuthString();
+                    var username = userService.readUsername(authToken);
+
+                    var gameSession = gameSessionManager.getGameSession(makeMoveCommand.getGameID(), authToken);
+                    gameSession.makeMove(authToken, makeMoveCommand.getMove());
+
+                    var loadGameMessage = new LoadGame(gameSession.getGameData(authToken));
+                    String loadGameJson = new Gson().toJson(loadGameMessage);
+                    logger.fine("sending load game message to all clients: " + loadGameJson);
+                    gameSession.broadcast(null, loadGameJson);
+
+                    var notification = new Notification(
+                            username + " made a move: " + makeMoveCommand.getMove().toString());
+                    gameSession.broadcast(authToken, new Gson().toJson(notification));
                 }
                 case LEAVE -> {
                     var leaveCommand = new Gson().fromJson(message, Leave.class);

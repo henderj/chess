@@ -64,18 +64,9 @@ public class WebSocketCommunicator extends Endpoint {
             if (!session.isOpen()) {
                 tryConnect();
             }
-            session.getBasicRemote().sendText(new Gson().toJson(command));
-        } catch (IOException e) {
-            throw new ResponseException(500, e.getMessage());
-        }
-    }
-
-    public void sendCommandBlocking(UserGameCommand command) throws ResponseException {
-        try {
-            if (!session.isOpen()) {
-                tryConnect();
-            }
-            session.getBasicRemote().sendText(new Gson().toJson(command));
+            var commandJson = new Gson().toJson(command);
+            logger.fine("sending command to server: " + commandJson);
+            session.getBasicRemote().sendText(commandJson);
         } catch (IOException e) {
             throw new ResponseException(500, e.getMessage());
         }

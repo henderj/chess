@@ -123,6 +123,9 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if (ended) {
+            throw new InvalidMoveException("Game is over");
+        }
         var piece = board.getPiece(move.getStartPosition());
         if (piece == null) throw new InvalidMoveException("No piece at start position: " + move);
 

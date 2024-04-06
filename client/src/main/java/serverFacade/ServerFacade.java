@@ -4,10 +4,7 @@ import chess.ChessGame;
 import exception.ResponseException;
 import schema.request.*;
 import schema.response.*;
-import webSocketMessages.userCommands.JoinObserver;
-import webSocketMessages.userCommands.JoinPlayer;
-import webSocketMessages.userCommands.Leave;
-import webSocketMessages.userCommands.Resign;
+import webSocketMessages.userCommands.*;
 
 public class ServerFacade {
     private final HttpCommunicator httpCommunicator;
@@ -59,6 +56,10 @@ public class ServerFacade {
         return response;
     }
 
+    public void makeMove(MakeMove command) throws ResponseException {
+        webSocketCommunicator.sendCommand(command);
+    }
+
     public void leaveGame(Leave command) throws ResponseException {
         webSocketCommunicator.sendCommand(command);
     }
@@ -70,4 +71,5 @@ public class ServerFacade {
     public void clear() throws ResponseException {
         httpCommunicator.makeRequest("DELETE", "/db", null, null, null);
     }
+
 }

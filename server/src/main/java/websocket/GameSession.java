@@ -1,6 +1,8 @@
 package websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import exception.AlreadyTakenException;
 import exception.BadRequestException;
 import exception.ResponseException;
@@ -137,5 +139,32 @@ public class GameSession {
             observers.remove(c.authToken());
             logger.fine("cleared observer connection");
         }
+    }
+
+    public void makeMove(String authToken, ChessMove move) throws ResponseException {
+        ChessGame.TeamColor team = null;
+        if (whitePlayerConnection != null && authToken.equals(whitePlayerConnection.authToken())) {
+            team = ChessGame.TeamColor.WHITE;
+        } else if (blackPlayerConnection != null && authToken.equals(blackPlayerConnection.authToken())) {
+            team = ChessGame.TeamColor.BLACK;
+        }
+
+        if (team == null) {
+            throw new BadRequestException("Only players can make moves.");
+        }
+
+        var gameData = getGameData(authToken);
+        var game = gameData.game();
+        if (team != game.getTeamTurn()) {
+            throw new BadRequestException("You can only move on your turn.");
+        }
+
+        try {
+            game.makeMove(move);
+        } catch (InvalidMoveException e) {
+            throw new BadRequestException("That is not a valid move.");
+        }
+
+        gameService.updateGame(gameData, authToken);
     }
 }
