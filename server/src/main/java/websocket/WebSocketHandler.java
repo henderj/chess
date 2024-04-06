@@ -39,21 +39,11 @@ public class WebSocketHandler {
             authService.authenticate(authToken);
             var username = userService.readUsername(authToken);
             switch (command.getCommandType()) {
-                case JOIN_PLAYER -> {
-                    doJoinPlayer(session, message, authToken, username);
-                }
-                case JOIN_OBSERVER -> {
-                    doJoinObserver(session, message, authToken, username);
-                }
-                case MAKE_MOVE -> {
-                    doMakeMove(message, authToken, username);
-                }
-                case LEAVE -> {
-                    doLeave(message, authToken, username);
-                }
-                case RESIGN -> {
-                    doResign(message, authToken, username);
-                }
+                case JOIN_PLAYER -> doJoinPlayer(session, message, authToken, username);
+                case JOIN_OBSERVER -> doJoinObserver(session, message, authToken, username);
+                case MAKE_MOVE -> doMakeMove(message, authToken, username);
+                case LEAVE -> doLeave(message, authToken, username);
+                case RESIGN -> doResign(message, authToken, username);
             }
         } catch (ResponseException | IOException e) {
             var errorMessage = new Error(e.getMessage());

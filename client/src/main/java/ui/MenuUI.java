@@ -13,11 +13,8 @@ import webSocketMessages.serverMessages.ServerMessage;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.logging.Logger;
 
 public class MenuUI implements ServerMessageObserver {
-    private static final Logger logger = Logger.getLogger("MenuUI");
-
     public static final String ERROR_TRY_AGAIN = "An unexpected error occurred. Please try again.";
 
 

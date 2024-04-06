@@ -9,7 +9,6 @@ import schema.request.LogoutRequest;
 import schema.request.RegisterRequest;
 import exception.NotAuthorizedException;
 import exception.ResponseException;
-import service.AuthService;
 import service.UserService;
 
 public class UserServiceTests {

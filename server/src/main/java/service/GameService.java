@@ -1,13 +1,10 @@
 package service;
 
-import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
 import exception.AlreadyTakenException;
 import exception.BadRequestException;
-import exception.NotAuthorizedException;
 import exception.ResponseException;
-import model.AuthData;
 import model.GameData;
 import schema.request.CreateGameRequest;
 import schema.request.JoinGameRequest;

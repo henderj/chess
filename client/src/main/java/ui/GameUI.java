@@ -17,8 +17,6 @@ import webSocketMessages.userCommands.MakeMove;
 import webSocketMessages.userCommands.Resign;
 
 import java.io.PrintStream;
-import java.util.InputMismatchException;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
