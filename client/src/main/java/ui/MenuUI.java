@@ -27,7 +27,7 @@ public class MenuUI implements ServerMessageObserver {
     private final GameUI gameUI;
     private String username;
     private String authToken;
-    private List<GameData> games;
+    private List<GameData> games = new ArrayList<>();
 
     public MenuUI(ServerFacade serverFacade) {
         out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
