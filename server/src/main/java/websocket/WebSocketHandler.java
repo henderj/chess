@@ -85,9 +85,7 @@ public class WebSocketHandler {
         var makeMoveCommand = new Gson().fromJson(message, MakeMove.class);
 
         var gameSession = gameSessionManager.getGameSession(makeMoveCommand.getGameID(), authToken);
-        gameSession.makeMove(authToken, makeMoveCommand.getMove());
-
-        // TODO: send notifications for check and checkmate
+        var resultNotification = gameSession.makeMove(authToken, makeMoveCommand.getMove());
 
         var loadGameMessage = new LoadGame(gameSession.getGameData(authToken));
         String loadGameJson = new Gson().toJson(loadGameMessage);
@@ -97,6 +95,10 @@ public class WebSocketHandler {
         var notification = new Notification(
                 username + " made a move: " + makeMoveCommand.getMove().toString());
         gameSession.broadcast(authToken, new Gson().toJson(notification));
+
+        if (resultNotification != null) {
+            gameSession.broadcast(null, new Gson().toJson(resultNotification));
+        }
     }
 
     private void doJoinObserver(Session session, String message, String authToken,

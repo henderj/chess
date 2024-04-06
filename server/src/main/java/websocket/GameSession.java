@@ -9,6 +9,7 @@ import exception.ResponseException;
 import model.GameData;
 import service.GameService;
 import service.UserService;
+import webSocketMessages.serverMessages.Notification;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -141,7 +142,7 @@ public class GameSession {
         }
     }
 
-    public void makeMove(String authToken, ChessMove move) throws ResponseException {
+    public Notification makeMove(String authToken, ChessMove move) throws ResponseException {
         ChessGame.TeamColor team = null;
         if (whitePlayerConnection != null && authToken.equals(whitePlayerConnection.authToken())) {
             team = ChessGame.TeamColor.WHITE;
@@ -155,6 +156,9 @@ public class GameSession {
 
         var gameData = getGameData(authToken);
         var game = gameData.game();
+        if (game.isEnded()) {
+            throw new BadRequestException("The game is over. No more moves are allowed.");
+        }
         if (team != game.getTeamTurn()) {
             throw new BadRequestException("You can only move on your turn.");
         }
@@ -165,6 +169,25 @@ public class GameSession {
             throw new BadRequestException("That is not a valid move.");
         }
 
+        Notification notification = null;
+        if (game.isInStalemate(ChessGame.TeamColor.WHITE) || game.isInStalemate(ChessGame.TeamColor.BLACK)) {
+            game.endGame();
+            notification = new Notification("Game over: Stalemate");
+        } else if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+            game.endGame();
+            notification = new Notification(
+                    gameData.whiteUsername() + " is in checkmate! " + gameData.blackUsername() + " won!");
+        } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+            game.endGame();
+            notification = new Notification(
+                    gameData.blackUsername() + " is in checkmate! " + gameData.whiteUsername() + " won!");
+        } else if (game.isInCheck(ChessGame.TeamColor.WHITE)) {
+            notification = new Notification(gameData.whiteUsername() + " is in check!");
+        } else if (game.isInCheck(ChessGame.TeamColor.BLACK)) {
+            notification = new Notification(gameData.blackUsername() + " is in check!");
+        }
+
         gameService.updateGame(gameData, authToken);
+        return notification;
     }
 }
