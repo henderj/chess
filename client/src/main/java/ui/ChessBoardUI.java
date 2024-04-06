@@ -7,6 +7,8 @@ import chess.ChessPosition;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ChessBoardUI {
 
@@ -16,6 +18,9 @@ public class ChessBoardUI {
             EscapeSequences.SET_BG_COLOR_BLACK + EscapeSequences.SET_TEXT_COLOR_LIGHT_GREY;
     private static final String CELL_BG_1 = EscapeSequences.SET_BG_COLOR + "115m";
     private static final String CELL_BG_2 = EscapeSequences.SET_BG_COLOR + "28m";
+    private static final String CELL_BG_START_POS = EscapeSequences.SET_BG_COLOR + "11m";
+    private static final String CELL_BG_END_POS_1 = EscapeSequences.SET_BG_COLOR + "123m"; //159
+    private static final String CELL_BG_END_POS_2 = EscapeSequences.SET_BG_COLOR + "75m";
     private static final String WHITE_PIECE_COLOR =
             EscapeSequences.SET_TEXT_COLOR_WHITE + EscapeSequences.SET_TEXT_BOLD;
     private static final String BLACK_PIECE_COLOR =
@@ -27,26 +32,37 @@ public class ChessBoardUI {
         var board = new ChessBoard();
         board.resetBoard();
         board.addPiece(new ChessPosition(4, 2), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
-        var displayString = ui.buildChessBoardDisplayString(board, ChessGame.TeamColor.WHITE);
+        var startPos = new ChessPosition(7, 4);
+        var endPositions = new HashSet<ChessPosition>();
+        endPositions.add(new ChessPosition(6, 4));
+        endPositions.add(new ChessPosition(5, 4));
+        var displayString = ui.buildChessBoardDisplayString(board, ChessGame.TeamColor.WHITE, startPos, endPositions);
         out.println(displayString);
         out.println();
-        displayString = ui.buildChessBoardDisplayString(board, ChessGame.TeamColor.BLACK);
+        displayString = ui.buildChessBoardDisplayString(board, ChessGame.TeamColor.BLACK, startPos, endPositions);
         out.println(displayString);
     }
 
-    public String buildChessBoardDisplayString(ChessBoard chessBoard, ChessGame.TeamColor perspective) {
+    public String buildChessBoardDisplayString(ChessBoard chessBoard, ChessGame.TeamColor perspective,
+                                               ChessPosition startPosition, Set<ChessPosition> endPositions) {
         var whitePerspective = perspective == ChessGame.TeamColor.WHITE;
         StringBuilder displayString = new StringBuilder();
         displayString.append(buildLetterCoordString(whitePerspective));
         displayString.append('\n');
-        var startBg1 = true;
+        var startbg1 = true;
         for (int i = 8; i > 0; i--) {
-            displayString.append(buildRow(chessBoard, whitePerspective ? i : 9 - i, startBg1, whitePerspective));
+            displayString.append(
+                    buildRow(chessBoard, whitePerspective ? i : 9 - i, startbg1, whitePerspective, startPosition,
+                             endPositions));
             displayString.append('\n');
-            startBg1 = !startBg1;
+            startbg1 = !startbg1;
         }
         displayString.append(buildLetterCoordString(whitePerspective));
         return displayString.toString();
+    }
+
+    public String buildChessBoardDisplayString(ChessBoard chessBoard, ChessGame.TeamColor perspective) {
+        return buildChessBoardDisplayString(chessBoard, perspective, null, null);
     }
 
     private String buildLetterCoordString(boolean forwards) {
@@ -65,6 +81,11 @@ public class ChessBoardUI {
     }
 
     private String buildRow(ChessBoard board, int row, boolean startBg1, boolean whitePerspective) {
+        return buildRow(board, row, startBg1, whitePerspective, null, null);
+    }
+
+    private String buildRow(ChessBoard board, int row, boolean startBg1, boolean whitePerspective,
+                            ChessPosition startPosition, Set<ChessPosition> endPositions) {
         StringBuilder string = new StringBuilder();
 
         string.append(COORD_STYLE);
@@ -73,8 +94,15 @@ public class ChessBoardUI {
 
         var bg1 = startBg1;
         for (var col = 1; col <= 8; col++) {
-            var piece = board.getPiece(new ChessPosition(row, whitePerspective ? col : 9 - col));
-            string.append(bg1 ? CELL_BG_1 : CELL_BG_2);
+            var background = bg1 ? CELL_BG_1 : CELL_BG_2;
+            var position = new ChessPosition(row, whitePerspective ? col : 9 - col);
+            if (position.equals(startPosition)) {
+                background = CELL_BG_START_POS;
+            } else if (endPositions != null && endPositions.contains(position)) {
+                background = bg1 ? CELL_BG_END_POS_1 : CELL_BG_END_POS_2;
+            }
+            var piece = board.getPiece(position);
+            string.append(background);
             if (piece != null) {
                 string.append(
                         piece.getTeamColor() == ChessGame.TeamColor.WHITE ? WHITE_PIECE_COLOR : BLACK_PIECE_COLOR);

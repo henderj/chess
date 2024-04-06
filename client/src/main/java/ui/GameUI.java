@@ -21,12 +21,14 @@ import java.util.Scanner;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static ui.MenuUI.ERROR_TRY_AGAIN;
 
 public class GameUI implements ServerMessageObserver {
     private static final Logger logger = Logger.getLogger("GameUI");
     private static final Pattern movePattern = Pattern.compile("^[a-hA-H][1-8][a-hA-H][1-8](?:=?[qrbnQRBN])?$");
+    private static final Pattern positionPattern = Pattern.compile("^[a-hA-H][1-8]$");
 
     private final ChessBoardUI chessBoardUI;
     private ChessGame.TeamColor perspective;
@@ -109,7 +111,8 @@ public class GameUI implements ServerMessageObserver {
                 return NextState.Game;
             }
             case 6 -> {
-                throw new RuntimeException("Not implemented");
+                doHighlightMoves();
+                return NextState.Game;
             }
             default -> {
                 out.println("Please enter a number from 1-6. Enter 1 for help.");
@@ -118,14 +121,28 @@ public class GameUI implements ServerMessageObserver {
         }
     }
 
+    private void doHighlightMoves() {
+        out.println("Enter the starting position");
+        var inputLine = in.next();
+        Matcher matcher = positionPattern.matcher(inputLine);
+        if (!matcher.find()) {
+            out.println("Enter a position in the pattern column row, with no spaces in between. For example, e2");
+            return;
+        }
+        var input = matcher.group();
+        input = input.toLowerCase();
+        var startPosition = new ChessPosition(input.charAt(1) - '1' + 1, input.charAt(0) - 'a' + 1);
+        drawCurrentBoardWithValidMoves(startPosition);
+    }
+
     private void doMakeMove() {
         out.println("Enter the move you want to make:");
         try {
             var inputLine = in.next();
             Matcher matcher = movePattern.matcher(inputLine);
             if (!matcher.find()) {
-                out.println("Enter a move in the patter source-column source-row target-column target-row," +
-                                    " with no spaces in between. For example, e3e5");
+                out.println("Enter a move in the pattern source-column source-row target-column target-row," +
+                                    " with no spaces in between. For example, e2e4");
                 out.println("If you are making a promotion move, add =? to the end of your move, " +
                                     "where ? is the piece you want to promote to.");
                 out.println("Q = queen, R = rook, B = bishop, and N = knight");
@@ -185,6 +202,15 @@ public class GameUI implements ServerMessageObserver {
         } catch (ResponseException e) {
             out.println(ERROR_TRY_AGAIN);
         }
+    }
+
+    private void drawCurrentBoardWithValidMoves(ChessPosition startPosition) {
+        var validMoves = currentGame.game().validMoves(startPosition);
+        var endPositions = validMoves.stream().map(ChessMove::getEndPosition).collect(Collectors.toSet());
+        var boardString = chessBoardUI.buildChessBoardDisplayString(currentGame.game().getBoard(), perspective,
+                                                                    startPosition, endPositions);
+        out.println();
+        out.println(boardString);
     }
 
     private void drawCurrentBoard() {
