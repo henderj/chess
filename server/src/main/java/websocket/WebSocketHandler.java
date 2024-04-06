@@ -6,6 +6,7 @@ import exception.ResponseException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import service.AuthService;
 import service.GameService;
 import service.UserService;
 import webSocketMessages.serverMessages.Error;
@@ -21,8 +22,10 @@ public class WebSocketHandler {
     private static final Logger logger = Logger.getLogger("WebSocketHandler");
     private final GameSessionManager gameSessionManager;
     private final UserService userService;
+    private final AuthService authService;
 
-    public WebSocketHandler(GameService gameService, UserService userService) {
+    public WebSocketHandler(GameService gameService, UserService userService, AuthService authService) {
+        this.authService = authService;
         gameSessionManager = new GameSessionManager(gameService, userService);
         this.userService = userService;
     }
@@ -32,7 +35,7 @@ public class WebSocketHandler {
         logger.info("received command from user: " + message);
         UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
         try {
-            userService.authenticate(command.getAuthString());
+            authService.authenticate(command.getAuthString());
             switch (command.getCommandType()) {
                 case JOIN_PLAYER -> {
                     var joinPlayerCommand = new Gson().fromJson(message, JoinPlayer.class);

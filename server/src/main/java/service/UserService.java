@@ -105,20 +105,4 @@ public class UserService {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         return encoder.matches(clearTextPassword, hashedPassword);
     }
-
-    public AuthData authenticate(String authToken) throws ResponseException {
-        if (authToken == null) {
-            throw new NotAuthorizedException();
-        }
-        try {
-            AuthData authData = authDAO.readAuth(authToken);
-            if (authData == null) {
-                throw new NotAuthorizedException();
-            }
-            return authData;
-        } catch (DataAccessException e) {
-            throw new ResponseException(500, "Internal error: Auth");
-        }
-    }
-
 }

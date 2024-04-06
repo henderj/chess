@@ -19,16 +19,16 @@ import schema.response.ListGamesResponse;
 import java.util.Collection;
 
 public class GameService {
-    private final AuthDAO authDAO;
     private final GameDAO gameDAO;
+    private final AuthService authService;
 
-    public GameService(AuthDAO authDAO, GameDAO gameDAO) {
-        this.authDAO = authDAO;
+    public GameService(GameDAO gameDAO, AuthService authService) {
         this.gameDAO = gameDAO;
+        this.authService = authService;
     }
 
     public CreateGameResponse createGame(CreateGameRequest request) throws ResponseException {
-        authenticate(request.authToken());
+        authService.authenticate(request.authToken());
 
         if (request.gameName() == null) {
             throw new BadRequestException();
@@ -43,7 +43,7 @@ public class GameService {
     }
 
     public JoinGameResponse joinGame(JoinGameRequest request) throws ResponseException {
-        var authData = authenticate(request.authToken());
+        var authData = authService.authenticate(request.authToken());
 
         if (request.gameID() == 0) {
             throw new BadRequestException();
@@ -60,7 +60,7 @@ public class GameService {
                 throw new BadRequestException("Game with id " + request.gameID() + " does not exist");
             }
 
-            var username = authDAO.readAuth(request.authToken()).username();
+            var username = authData.username();
 
             if (request.playerColor() != null) {
                 if (request.playerColor().equals("WHITE")) {
@@ -84,7 +84,7 @@ public class GameService {
     }
 
     public ListGamesResponse listGames(ListGamesRequest request) throws ResponseException {
-        authenticate(request.authToken());
+        authService.authenticate(request.authToken());
 
         try {
             Collection<GameData> gameDataCollection = gameDAO.listGames();
@@ -95,7 +95,7 @@ public class GameService {
     }
 
     public GameData readGame(int gameID, String authToken) throws ResponseException {
-        authenticate(authToken);
+        authService.authenticate(authToken);
 
         try {
             return gameDAO.readGame(gameID);
@@ -105,7 +105,7 @@ public class GameService {
     }
 
     public void updateGame(GameData gameData, String authToken) throws ResponseException {
-        authenticate(authToken);
+        authService.authenticate(authToken);
 
         try {
             gameDAO.updateGame(gameData);
@@ -113,21 +113,4 @@ public class GameService {
             throw new ResponseException(500, "Internal error: " + e.getMessage());
         }
     }
-
-    private AuthData authenticate(String authToken) throws ResponseException {
-        // TODO: refactor
-        if (authToken == null) {
-            throw new NotAuthorizedException();
-        }
-        try {
-            AuthData authData = authDAO.readAuth(authToken);
-            if (authData == null) {
-                throw new NotAuthorizedException();
-            }
-            return authData;
-        } catch (DataAccessException e) {
-            throw new ResponseException(500, "Internal error: Auth");
-        }
-    }
-
 }

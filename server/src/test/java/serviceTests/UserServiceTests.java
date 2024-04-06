@@ -9,6 +9,7 @@ import schema.request.LogoutRequest;
 import schema.request.RegisterRequest;
 import exception.NotAuthorizedException;
 import exception.ResponseException;
+import service.AuthService;
 import service.UserService;
 
 public class UserServiceTests {
@@ -16,13 +17,16 @@ public class UserServiceTests {
     private UserService getUserService() throws DataAccessException {
         var db = new DatabaseManager();
         db.clearTables();
-        return new UserService(new SQLUserDAO(db), new SQLAuthDAO(db));
+        SQLUserDAO userDAO = new SQLUserDAO(db);
+        SQLAuthDAO authDAO = new SQLAuthDAO(db);
+        return new UserService(userDAO, authDAO);
     }
 
     @Test
     public void canRegisterNewUser() throws DataAccessException {
         var userService = getUserService();
-        Assertions.assertDoesNotThrow(() -> userService.register(new RegisterRequest("name", "password", "email@email.com")));
+        Assertions.assertDoesNotThrow(
+                () -> userService.register(new RegisterRequest("name", "password", "email@email.com")));
     }
 
     @Test
@@ -53,7 +57,8 @@ public class UserServiceTests {
         var email = "email@email.com";
 
         userService.register(new RegisterRequest(username, password, email));
-        Assertions.assertThrows(NotAuthorizedException.class, () -> userService.login(new LoginRequest(username, badPassword)));
+        Assertions.assertThrows(NotAuthorizedException.class,
+                                () -> userService.login(new LoginRequest(username, badPassword)));
     }
 
     @Test
@@ -70,6 +75,7 @@ public class UserServiceTests {
     @Test
     public void cannotLogoutWithBadAuthToken() throws DataAccessException {
         var userService = getUserService();
-        Assertions.assertThrows(NotAuthorizedException.class, () -> userService.logout(new LogoutRequest("not a token")));
+        Assertions.assertThrows(NotAuthorizedException.class,
+                                () -> userService.logout(new LogoutRequest("not a token")));
     }
 }

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import schema.request.CreateGameRequest;
 import schema.request.JoinGameRequest;
 import schema.request.ListGamesRequest;
+import service.AuthService;
 import service.GameService;
 
 public class GameServiceTests {
@@ -29,7 +30,8 @@ public class GameServiceTests {
         var db = new DatabaseManager();
         gameDAO = new SQLGameDAO(db);
         authDAO = new SQLAuthDAO(db);
-        gameService = new GameService(authDAO, gameDAO);
+        var authService = new AuthService(authDAO);
+        gameService = new GameService(gameDAO, authService);
     }
 
     @Test

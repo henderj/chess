@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dataAccess.*;
 import schema.request.*;
 import schema.response.ErrorResponse;
+import service.AuthService;
 import service.ClearService;
 import exception.ResponseException;
 import service.GameService;
@@ -19,6 +20,7 @@ public class Server {
 
     private static final String RESPONSE_TYPE = "application/json";
 
+    private final AuthService authService;
     private final UserService userService;
     private final ClearService clearService;
     private final GameService gameService;
@@ -30,9 +32,10 @@ public class Server {
         var authDOA = new SQLAuthDAO(databaseManager);
         var gameDOA = new SQLGameDAO(databaseManager);
 
+        authService = new AuthService(authDOA);
         userService = new UserService(userDOA, authDOA);
         clearService = new ClearService(userDOA, authDOA, gameDOA);
-        gameService = new GameService(authDOA, gameDOA);
+        gameService = new GameService(gameDOA, authService);
     }
 
     public int run(int desiredPort) {
@@ -40,7 +43,7 @@ public class Server {
 
         Spark.staticFiles.location("web");
 
-        Spark.webSocket("/connect", new WebSocketHandler(gameService, userService));
+        Spark.webSocket("/connect", new WebSocketHandler(gameService, userService, authService));
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", this::handleClear);
