@@ -35,90 +35,105 @@ public class WebSocketHandler {
         logger.info("received command from user: " + message);
         UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
         try {
-            authService.authenticate(command.getAuthString());
+            var authToken = command.getAuthString();
+            authService.authenticate(authToken);
+            var username = userService.readUsername(authToken);
             switch (command.getCommandType()) {
                 case JOIN_PLAYER -> {
-                    var joinPlayerCommand = new Gson().fromJson(message, JoinPlayer.class);
-                    var authToken = joinPlayerCommand.getAuthString();
-                    var username = userService.readUsername(authToken);
-                    var gameID = joinPlayerCommand.getGameID();
-
-                    var gameSession = gameSessionManager.getGameSession(gameID, authToken);
-                    Connection connection = new Connection(authToken, session);
-                    gameSession.addPlayer(connection, joinPlayerCommand.getPlayerColor());
-
-                    LoadGame loadGameMessage = new LoadGame(gameSession.getGameData(authToken));
-                    String loadGameJson = new Gson().toJson(loadGameMessage);
-                    logger.fine("sending load game message to player: " + loadGameJson);
-                    session.getRemote().sendString(loadGameJson);
-
-                    var notification = new Notification(
-                            username + " joined as " + (joinPlayerCommand.getPlayerColor() == ChessGame.TeamColor.WHITE ? "white" : "black"));
-                    gameSession.broadcast(authToken, new Gson().toJson(notification));
+                    doJoinPlayer(session, message, authToken, username);
                 }
                 case JOIN_OBSERVER -> {
-                    var joinObserverCommand = new Gson().fromJson(message, JoinObserver.class);
-                    var authToken = joinObserverCommand.getAuthString();
-                    var username = userService.readUsername(authToken);
-                    var gameID = joinObserverCommand.getGameID();
-
-                    var gameSession = gameSessionManager.getGameSession(gameID, authToken);
-                    Connection connection = new Connection(authToken, session);
-                    gameSession.addObserver(connection);
-
-                    LoadGame loadGameMessage = new LoadGame(gameSession.getGameData(authToken));
-                    String loadGameJson = new Gson().toJson(loadGameMessage);
-                    logger.fine("sending load game message to player: " + loadGameJson);
-                    session.getRemote().sendString(loadGameJson);
-
-                    var notification = new Notification(username + " joined as an observer");
-                    gameSession.broadcast(authToken, new Gson().toJson(notification));
+                    doJoinObserver(session, message, authToken, username);
                 }
                 case MAKE_MOVE -> {
-                    var makeMoveCommand = new Gson().fromJson(message, MakeMove.class);
-                    var authToken = makeMoveCommand.getAuthString();
-                    var username = userService.readUsername(authToken);
-
-                    var gameSession = gameSessionManager.getGameSession(makeMoveCommand.getGameID(), authToken);
-                    gameSession.makeMove(authToken, makeMoveCommand.getMove());
-
-                    // TODO: send notifications for check and checkmate
-
-                    var loadGameMessage = new LoadGame(gameSession.getGameData(authToken));
-                    String loadGameJson = new Gson().toJson(loadGameMessage);
-                    logger.fine("sending load game message to all clients: " + loadGameJson);
-                    gameSession.broadcast(null, loadGameJson);
-
-                    var notification = new Notification(
-                            username + " made a move: " + makeMoveCommand.getMove().toString());
-                    gameSession.broadcast(authToken, new Gson().toJson(notification));
+                    doMakeMove(message, authToken, username);
                 }
                 case LEAVE -> {
-                    var leaveCommand = new Gson().fromJson(message, Leave.class);
-                    var authToken = leaveCommand.getAuthString();
-                    var username = userService.readUsername(authToken);
-
-                    var gameSession = gameSessionManager.getGameSession(leaveCommand.getGameID(), authToken);
-                    gameSession.removeParticipant(authToken);
-
-                    var notification = new Notification(username + " left the game");
-                    gameSession.broadcast(null, new Gson().toJson(notification));
+                    doLeave(message, authToken, username);
                 }
                 case RESIGN -> {
-                    var resignCommand = new Gson().fromJson(message, Resign.class);
-                    var authToken = resignCommand.getAuthString();
-                    var username = userService.readUsername(authToken);
-
-                    var gameSession = gameSessionManager.getGameSession(resignCommand.getGameID(), authToken);
-                    gameSession.endGame(authToken);
-
-                    var notification = new Notification(username + " resigned");
-                    gameSession.broadcast(null, new Gson().toJson(notification));
+                    doResign(message, authToken, username);
                 }
             }
         } catch (ResponseException | IOException e) {
             var errorMessage = new Error(e.getMessage());
             session.getRemote().sendString(new Gson().toJson(errorMessage));
         }
+    }
+
+    private void doResign(String message, String authToken, String username) throws ResponseException, IOException {
+        var resignCommand = new Gson().fromJson(message, Resign.class);
+
+        var gameSession = gameSessionManager.getGameSession(resignCommand.getGameID(), authToken);
+        gameSession.endGame(authToken);
+
+        var notification = new Notification(username + " resigned");
+        gameSession.broadcast(null, new Gson().toJson(notification));
+    }
+
+    private void doLeave(String message, String authToken, String username) throws ResponseException, IOException {
+        var leaveCommand = new Gson().fromJson(message, Leave.class);
+
+        var gameSession = gameSessionManager.getGameSession(leaveCommand.getGameID(), authToken);
+        gameSession.removeParticipant(authToken);
+
+        var notification = new Notification(username + " left the game");
+        gameSession.broadcast(null, new Gson().toJson(notification));
+    }
+
+    private void doMakeMove(String message, String authToken, String username) throws ResponseException, IOException {
+        var makeMoveCommand = new Gson().fromJson(message, MakeMove.class);
+
+        var gameSession = gameSessionManager.getGameSession(makeMoveCommand.getGameID(), authToken);
+        gameSession.makeMove(authToken, makeMoveCommand.getMove());
+
+        // TODO: send notifications for check and checkmate
+
+        var loadGameMessage = new LoadGame(gameSession.getGameData(authToken));
+        String loadGameJson = new Gson().toJson(loadGameMessage);
+        logger.fine("sending load game message to all clients: " + loadGameJson);
+        gameSession.broadcast(null, loadGameJson);
+
+        var notification = new Notification(
+                username + " made a move: " + makeMoveCommand.getMove().toString());
+        gameSession.broadcast(authToken, new Gson().toJson(notification));
+    }
+
+    private void doJoinObserver(Session session, String message, String authToken,
+                                String username) throws ResponseException, IOException {
+        var joinObserverCommand = new Gson().fromJson(message, JoinObserver.class);
+        var gameID = joinObserverCommand.getGameID();
+
+        var gameSession = gameSessionManager.getGameSession(gameID, authToken);
+        Connection connection = new Connection(authToken, session);
+        gameSession.addObserver(connection);
+
+        LoadGame loadGameMessage = new LoadGame(gameSession.getGameData(authToken));
+        String loadGameJson = new Gson().toJson(loadGameMessage);
+        logger.fine("sending load game message to player: " + loadGameJson);
+        session.getRemote().sendString(loadGameJson);
+
+        var notification = new Notification(username + " joined as an observer");
+        gameSession.broadcast(authToken, new Gson().toJson(notification));
+    }
+
+    private void doJoinPlayer(Session session, String message, String authToken,
+                              String username) throws ResponseException, IOException {
+        var joinPlayerCommand = new Gson().fromJson(message, JoinPlayer.class);
+        var gameID = joinPlayerCommand.getGameID();
+
+        var gameSession = gameSessionManager.getGameSession(gameID, authToken);
+        Connection connection = new Connection(authToken, session);
+        gameSession.addPlayer(connection, joinPlayerCommand.getPlayerColor());
+
+        LoadGame loadGameMessage = new LoadGame(gameSession.getGameData(authToken));
+        String loadGameJson = new Gson().toJson(loadGameMessage);
+        logger.fine("sending load game message to player: " + loadGameJson);
+        session.getRemote().sendString(loadGameJson);
+
+        var notification = new Notification(
+                username + " joined as " + (joinPlayerCommand.getPlayerColor() == ChessGame.TeamColor.WHITE ?
+                        "white" : "black"));
+        gameSession.broadcast(authToken, new Gson().toJson(notification));
     }
 }
