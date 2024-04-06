@@ -79,6 +79,8 @@ public class WebSocketHandler {
                     var gameSession = gameSessionManager.getGameSession(makeMoveCommand.getGameID(), authToken);
                     gameSession.makeMove(authToken, makeMoveCommand.getMove());
 
+                    // TODO: send notifications for check and checkmate
+
                     var loadGameMessage = new LoadGame(gameSession.getGameData(authToken));
                     String loadGameJson = new Gson().toJson(loadGameMessage);
                     logger.fine("sending load game message to all clients: " + loadGameJson);
