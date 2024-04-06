@@ -115,6 +115,7 @@ public class GameService {
     }
 
     private AuthData authenticate(String authToken) throws ResponseException {
+        // TODO: refactor
         if (authToken == null) {
             throw new NotAuthorizedException();
         }

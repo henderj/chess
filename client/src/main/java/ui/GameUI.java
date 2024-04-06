@@ -133,6 +133,7 @@ public class GameUI implements ServerMessageObserver {
                 out.println("Q = queen, R = rook, B = bishop, and N = knight");
                 return;
             }
+            // TODO: refactor
             var input = matcher.group();
             input = input.toLowerCase();
             var startPosition = new ChessPosition(input.charAt(1) - '1' + 1, input.charAt(0) - 'a' + 1);
