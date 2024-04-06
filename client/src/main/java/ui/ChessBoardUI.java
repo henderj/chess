@@ -39,11 +39,11 @@ public class ChessBoardUI {
         StringBuilder displayString = new StringBuilder();
         displayString.append(buildLetterCoordString(whitePerspective));
         displayString.append('\n');
-        var start_bg_1 = true;
+        var startBg1 = true;
         for (int i = 8; i > 0; i--) {
-            displayString.append(buildRow(chessBoard, whitePerspective ? i : 9 - i, start_bg_1, whitePerspective));
+            displayString.append(buildRow(chessBoard, whitePerspective ? i : 9 - i, startBg1, whitePerspective));
             displayString.append('\n');
-            start_bg_1 = !start_bg_1;
+            startBg1 = !startBg1;
         }
         displayString.append(buildLetterCoordString(whitePerspective));
         return displayString.toString();
@@ -64,14 +64,14 @@ public class ChessBoardUI {
         return string.toString();
     }
 
-    private String buildRow(ChessBoard board, int row, boolean start_bg_1, boolean whitePerspective) {
+    private String buildRow(ChessBoard board, int row, boolean startBg1, boolean whitePerspective) {
         StringBuilder string = new StringBuilder();
 
         string.append(COORD_STYLE);
         string.append(applyPadding("" + row));
         string.append(EscapeSequences.RESET_COLOR);
 
-        var bg1 = start_bg_1;
+        var bg1 = startBg1;
         for (var col = 1; col <= 8; col++) {
             var piece = board.getPiece(new ChessPosition(row, whitePerspective ? col : 9 - col));
             string.append(bg1 ? CELL_BG_1 : CELL_BG_2);
