@@ -157,6 +157,7 @@ public class GameUI implements ServerMessageObserver {
     private void doResignGame() {
         var command = new Resign(authToken, currentGame.gameID());
         try {
+            // TODO: confirm resignation
             facade.resignGame(command);
         } catch (ResponseException e) {
             out.println(ERROR_TRY_AGAIN);
