@@ -8,12 +8,7 @@ import schema.request.*;
 import schema.response.RegisterResponse;
 import serverFacade.HttpCommunicator;
 import serverFacade.ServerFacade;
-import webSocketMessages.serverMessages.Error;
-import webSocketMessages.serverMessages.LoadGame;
-import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
-import webSocketMessages.userCommands.Leave;
-import webSocketMessages.userCommands.Resign;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -26,26 +21,19 @@ public class MenuUI implements ServerMessageObserver {
     public static final String ERROR_TRY_AGAIN = "An unexpected error occurred. Please try again.";
 
 
-    enum NextState {
-        PreLogin,
-        PostLogin,
-        Game, Quit
-    }
-
-    private PrintStream out;
-    private Scanner in;
+    private final PrintStream out;
+    private final Scanner in;
     private final ServerFacade facade;
-    private final ChessBoardUI chessBoardUI;
-    private ChessGame.TeamColor perspective;
-    private boolean isObserver;
+    private final GameUI gameUI;
     private String username;
     private String authToken;
     private List<GameData> games;
-    private GameData currentGame;
 
     public MenuUI(ServerFacade serverFacade) {
+        out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        in = new Scanner(System.in);
         this.facade = serverFacade;
-        chessBoardUI = new ChessBoardUI();
+        gameUI = new GameUI(out, in, facade);
     }
 
     public static void main(String[] args) {
@@ -54,8 +42,6 @@ public class MenuUI implements ServerMessageObserver {
     }
 
     public void startMenuLoop() {
-        out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        in = new Scanner(System.in);
 
         displayWelcome();
 
@@ -64,7 +50,7 @@ public class MenuUI implements ServerMessageObserver {
             switch (nextState) {
                 case PreLogin -> nextState = displayPreLoginUI();
                 case PostLogin -> nextState = displayPostLoginUI();
-                case Game -> nextState = displayGameUI();
+                case Game -> nextState = gameUI.displayGameUI();
             }
         }
 
@@ -73,22 +59,7 @@ public class MenuUI implements ServerMessageObserver {
 
     @Override
     public void sendMessage(ServerMessage message) {
-        logger.fine("received message from server: " + message);
-        switch (message.getServerMessageType()) {
-            case LOAD_GAME -> {
-                var loadGameMessage = (LoadGame) message;
-                currentGame = loadGameMessage.getGame();
-                drawCurrentBoard();
-            }
-            case ERROR -> {
-                var error = (Error) message;
-                out.println("Error: " + error.getErrorMessage());
-            }
-            case NOTIFICATION -> {
-                var notification = (Notification) message;
-                out.println(notification.getMessage());
-            }
-        }
+        gameUI.sendMessage(message);
     }
 
     private void displayWelcome() {
@@ -297,8 +268,8 @@ public class MenuUI implements ServerMessageObserver {
         var request = new JoinGameRequest(authToken, color, gameId);
         try {
             facade.joinGame(request);
-            perspective = color.equals("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-            isObserver = false;
+            var perspective = color.equals("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+            gameUI.initialize(perspective, username, authToken);
             return NextState.Game;
         } catch (ResponseException e) {
             switch (e.getStatusCode()) {
@@ -329,8 +300,8 @@ public class MenuUI implements ServerMessageObserver {
         var request = new JoinGameRequest(authToken, null, gameId);
         try {
             facade.joinGame(request);
-            perspective = ChessGame.TeamColor.WHITE;
-            isObserver = true;
+            var perspective = ChessGame.TeamColor.WHITE;
+            gameUI.initialize(perspective, username, authToken);
             return NextState.Game;
         } catch (ResponseException e) {
             if (e.getStatusCode() == 400) {
@@ -352,82 +323,5 @@ public class MenuUI implements ServerMessageObserver {
             out.println(ERROR_TRY_AGAIN);
             return NextState.PostLogin;
         }
-    }
-
-    private NextState displayGameUI() {
-        if (currentGame != null) {
-            out.print("[" + username + ", " + currentGame.gameName() + "] ");
-        }
-        out.print("> ");
-
-        try {
-            var input = in.nextInt();
-            switch (input) {
-                case 1 -> {
-                    out.println("Enter 1 to display this help message. Enter 2 to redraw the chess board.");
-                    out.println("Enter 3 to leave the game. Enter 4 to make a move.");
-                    out.println("Enter 5 to resign. Enter 6 to highlight legal moves.");
-                    return NextState.Game;
-                }
-                case 2 -> {
-                    drawCurrentBoard();
-                    return NextState.Game;
-                }
-                case 3 -> {
-                    doLeaveGame();
-                    return NextState.PostLogin;
-                }
-                case 4 -> {
-                    throw new RuntimeException("Not implemented");
-                }
-                case 5 -> {
-                    return doResignGame();
-                }
-                case 6 -> {
-                    throw new RuntimeException("Not implemented");
-                }
-                default -> {
-                    out.println("Please enter a number from 1-6. Enter 1 for help.");
-                    return NextState.Game;
-                }
-            }
-        } catch (InputMismatchException ex) {
-            out.println("Please enter a number from 1-6. Enter 1 for help.");
-            return NextState.Game;
-        }
-    }
-
-    private NextState doResignGame() {
-        if (isObserver) {
-            out.println("You are an observer. You cannot resign the game.");
-            return NextState.Game;
-        }
-        var command = new Resign(authToken, currentGame.gameID());
-        try {
-            facade.resignGame(command);
-            perspective = null;
-            currentGame = null;
-            return NextState.PostLogin;
-        } catch (ResponseException e) {
-            out.println(ERROR_TRY_AGAIN);
-            return NextState.Game;
-        }
-    }
-
-    private void doLeaveGame() {
-        var command = new Leave(authToken, currentGame.gameID());
-        try {
-            facade.leaveGame(command);
-            perspective = null;
-            currentGame = null;
-        } catch (ResponseException e) {
-            out.println(ERROR_TRY_AGAIN);
-        }
-    }
-
-    private void drawCurrentBoard() {
-        var boardString = chessBoardUI.buildChessBoardDisplayString(currentGame.game().getBoard(), perspective);
-        out.println();
-        out.println(boardString);
     }
 }

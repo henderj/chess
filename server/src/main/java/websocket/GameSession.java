@@ -2,6 +2,7 @@ package websocket;
 
 import chess.ChessGame;
 import exception.AlreadyTakenException;
+import exception.BadRequestException;
 import exception.ResponseException;
 import model.GameData;
 import service.GameService;
@@ -55,7 +56,14 @@ public class GameSession {
     }
 
     public void endGame(String authToken) throws ResponseException {
+        if (!authToken.equals(whitePlayerConnection.authToken()) && !authToken.equals(
+                blackPlayerConnection.authToken())) {
+            throw new BadRequestException("Only a player can end the game.");
+        }
         var gameData = getGameData(authToken);
+        if (gameData.game().isEnded()) {
+            throw new BadRequestException("Game has already ended.");
+        }
         gameData.game().endGame();
         gameService.updateGame(gameData, authToken);
     }

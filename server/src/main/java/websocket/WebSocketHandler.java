@@ -90,7 +90,6 @@ public class WebSocketHandler {
                     var username = userService.readUsername(authToken);
 
                     var gameSession = gameSessionManager.getGameSession(resignCommand.getGameID(), authToken);
-                    gameSession.removeParticipant(authToken);
                     gameSession.endGame(authToken);
 
                     var notification = new Notification(username + " resigned");
