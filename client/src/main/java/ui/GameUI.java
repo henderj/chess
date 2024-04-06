@@ -133,26 +133,34 @@ public class GameUI implements ServerMessageObserver {
                 out.println("Q = queen, R = rook, B = bishop, and N = knight");
                 return;
             }
-            // TODO: refactor
-            var input = matcher.group();
-            input = input.toLowerCase();
-            var startPosition = new ChessPosition(input.charAt(1) - '1' + 1, input.charAt(0) - 'a' + 1);
-            var endPosition = new ChessPosition(input.charAt(3) - '1' + 1, input.charAt(0) - 'a' + 1);
-            ChessPiece.PieceType promotionPiece = null;
-            if (input.length() > 4) {
-                switch (input.charAt(4)) {
-                    case 'q' -> promotionPiece = ChessPiece.PieceType.QUEEN;
-                    case 'r' -> promotionPiece = ChessPiece.PieceType.ROOK;
-                    case 'b' -> promotionPiece = ChessPiece.PieceType.BISHOP;
-                    case 'n' -> promotionPiece = ChessPiece.PieceType.KNIGHT;
-                }
-            }
-            var move = new ChessMove(startPosition, endPosition, promotionPiece);
-            var makeMoveCommand = new MakeMove(authToken, currentGame.gameID(), move);
+            var makeMoveCommand = getMakeMove(matcher);
             facade.makeMove(makeMoveCommand);
         } catch (ResponseException e) {
             out.println(ERROR_TRY_AGAIN);
         }
+    }
+
+    private MakeMove getMakeMove(Matcher matcher) {
+        var input = matcher.group();
+        input = input.toLowerCase();
+        var startPosition = new ChessPosition(input.charAt(1) - '1' + 1, input.charAt(0) - 'a' + 1);
+        var endPosition = new ChessPosition(input.charAt(3) - '1' + 1, input.charAt(2) - 'a' + 1);
+        var promotionPiece = getPromotionPiece(input);
+        var move = new ChessMove(startPosition, endPosition, promotionPiece);
+        return new MakeMove(authToken, currentGame.gameID(), move);
+    }
+
+    private static ChessPiece.PieceType getPromotionPiece(String input) {
+        ChessPiece.PieceType promotionPiece = null;
+        if (input.length() > 4) {
+            switch (input.charAt(4)) {
+                case 'q' -> promotionPiece = ChessPiece.PieceType.QUEEN;
+                case 'r' -> promotionPiece = ChessPiece.PieceType.ROOK;
+                case 'b' -> promotionPiece = ChessPiece.PieceType.BISHOP;
+                case 'n' -> promotionPiece = ChessPiece.PieceType.KNIGHT;
+            }
+        }
+        return promotionPiece;
     }
 
     private void doResignGame() {
