@@ -56,8 +56,9 @@ public class GameSession {
     }
 
     public void endGame(String authToken) throws ResponseException {
-        if (!authToken.equals(whitePlayerConnection.authToken()) && !authToken.equals(
-                blackPlayerConnection.authToken())) {
+        cleanUpConnections();
+        if ((whitePlayerConnection == null || !authToken.equals(whitePlayerConnection.authToken())) &&
+                (blackPlayerConnection == null || !authToken.equals(blackPlayerConnection.authToken()))) {
             throw new BadRequestException("Only a player can end the game.");
         }
         var gameData = getGameData(authToken);
@@ -95,10 +96,12 @@ public class GameSession {
     }
 
     public void addObserver(Connection connection) {
+        cleanUpConnections();
         observers.put(connection.authToken(), connection);
     }
 
     public void removeParticipant(String authToken) {
+        cleanUpConnections();
         if (whitePlayerConnection != null && whitePlayerConnection.authToken().equals(authToken)) {
             whitePlayerConnection.session().close();
             whitePlayerConnection = null;
