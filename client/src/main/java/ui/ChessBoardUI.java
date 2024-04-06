@@ -80,10 +80,6 @@ public class ChessBoardUI {
         return string.toString();
     }
 
-    private String buildRow(ChessBoard board, int row, boolean startBg1, boolean whitePerspective) {
-        return buildRow(board, row, startBg1, whitePerspective, null, null);
-    }
-
     private String buildRow(ChessBoard board, int row, boolean startBg1, boolean whitePerspective,
                             ChessPosition startPosition, Set<ChessPosition> endPositions) {
         StringBuilder string = new StringBuilder();
